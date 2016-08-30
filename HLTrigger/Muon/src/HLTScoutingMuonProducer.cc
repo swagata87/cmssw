@@ -117,8 +117,21 @@ void HLTScoutingMuonProducer::produce(edm::StreamID sid, edm::Event & iEvent,
                                track->charge(), track->dxy(), track->dz(),
                                track->hitPattern().numberOfValidMuonHits(),
                                track->hitPattern().numberOfValidPixelHits(),
+			       track->hitPattern().numberOfValidStripHits(),
                                0, // nMatchedStations
                                track->hitPattern().trackerLayersWithMeasurement(),
+			       track->qoverp(),
+			       track->theta(),
+			       track->lambda(),
+			       track->pt(),
+			       track->vx(),
+			       track->vy(),
+			       track->vz(),
+			       track->px(),
+			       track->py(),
+			       track->pz(),
+			       track->phi(),
+			       track->eta(),
                                2); // Global muon
     }
 
