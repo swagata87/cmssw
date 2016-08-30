@@ -10,14 +10,14 @@
       <version ClassVersion="2" checksum="2803573918"/>
       <version ClassVersion="3" checksum="3020184314"/>
   </class>
-  <class name="ScoutingVertex" ClassVersion="2">
-      <version ClassVersion="2" checksum="2969738609"/>
+  <class name="ScoutingVertex" ClassVersion="4">
+      <version ClassVersion="4" checksum="2878472351"/>
   </class>
   <class name="ScoutingElectron" ClassVersion="2">
       <version ClassVersion="2" checksum="1190461538"/>
   </class>
-  <class name="ScoutingMuon" ClassVersion="4">
-      <version ClassVersion="4" checksum="1767278882"/>
+  <class name="ScoutingMuon" ClassVersion="5">
+      <version ClassVersion="5" checksum="2188274235"/>
   </class>
   <class name="ScoutingPhoton" ClassVersion="2">
       <version ClassVersion="2" checksum="2797410539"/>
