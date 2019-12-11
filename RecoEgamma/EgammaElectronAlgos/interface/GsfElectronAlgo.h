@@ -209,7 +209,7 @@ class GsfElectronAlgo {
     void completeElectrons( reco::GsfElectronCollection & electrons, // do not redo cloned electrons done previously
                             edm::Event const& event,
                             edm::EventSetup const& eventSetup,
-                            const gsfAlgoHelpers::HeavyObjectCache* hoc);
+                            const gsfAlgoHelpers::HeavyObjectCache* hoc,const edm::EventSetup& iSetup);
 
   private :
 
@@ -360,7 +360,7 @@ class GsfElectronAlgo {
     void checkSetup( edm::EventSetup const& eventSetup ) ;
     EventData beginEvent( edm::Event const& event ) ;
 
-    void createElectron(reco::GsfElectronCollection & electrons, ElectronData & electronData, EventData & eventData, const gsfAlgoHelpers::HeavyObjectCache*) ;
+    void createElectron(reco::GsfElectronCollection & electrons, ElectronData & electronData, EventData & eventData, const gsfAlgoHelpers::HeavyObjectCache*,const edm::EventSetup& iSetup) ;
 
     void setMVAepiBasedPreselectionFlag(reco::GsfElectron & ele);
     void setCutBasedPreselectionFlag( reco::GsfElectron & ele, const reco::BeamSpot & ) ;
@@ -369,7 +369,7 @@ class GsfElectronAlgo {
     void calculateShowerShape( const reco::SuperClusterRef &,
                                ElectronHcalHelper const& hcalHelper,
                                reco::GsfElectron::ShowerShape &,
-                               EventData const& eventData );
+                               EventData const& eventData, const edm::EventSetup& iSetup);
     void calculateSaturationInfo(const reco::SuperClusterRef&, reco::GsfElectron::SaturationInfo&,
                                  EventData const& eventData);
 

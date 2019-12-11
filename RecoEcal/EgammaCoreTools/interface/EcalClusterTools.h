@@ -56,6 +56,8 @@
 #include "Geometry/CaloTopology/interface/CaloTopology.h"
 #include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
 #include "Geometry/EcalAlgo/interface/EcalBarrelGeometry.h"
+#include "CondFormats/EcalObjects/interface/EcalPFRecHitThresholds.h"
+#include "CondFormats/DataRecord/interface/EcalPFRecHitThresholdsRcd.h"
 
 
 class DetId;
@@ -72,6 +74,15 @@ struct Cluster2ndMoments {
   Cluster2ndMoments():sMaj(0.),sMin(0.),alpha(0.){}
 
 };
+
+struct vect {
+  std::vector<float> cov;
+  std::vector<float> thr;
+  std::vector<float> cryseta;
+  std::vector<float> crysphi;
+
+};
+
 
 template<bool noZS>
 class EcalClusterToolsT {
@@ -157,6 +168,8 @@ class EcalClusterToolsT {
                 //Warning: covIEtaIEta has been studied by egamma, but so far covIPhiIPhi hasnt been studied extensively so there could be a bug in 
                 //         the covIPhiIEta or covIPhiIPhi calculations. I dont think there is but as it hasnt been heavily used, there might be one
                 static std::vector<float> localCovariances(const reco::BasicCluster &cluster, const EcalRecHitCollection* recHits, const CaloTopology *topology, float w0 = 4.7);
+
+		static vect localCovariances_NoiseCleaned(const reco::BasicCluster &cluster, const EcalRecHitCollection* recHits, const CaloTopology *topology, const CaloGeometry* geometry, const edm::EventSetup* eventSetup_, float w0 = 4.7, float mult=1);
                 
                 static std::vector<float> scLocalCovariances(const reco::SuperCluster &cluster, const EcalRecHitCollection* recHits,const CaloTopology *topology, float w0 = 4.7);
 
@@ -929,6 +942,106 @@ std::vector<float> EcalClusterToolsT<noZS>::localCovariances(const reco::BasicCl
     v.push_back( covEtaPhi );
     v.push_back( covPhiPhi );
     return v;
+}
+
+
+template<bool noZS>
+vect EcalClusterToolsT<noZS>::localCovariances_NoiseCleaned(const reco::BasicCluster &cluster, const EcalRecHitCollection* recHits,const CaloTopology *topology, const CaloGeometry* geometry, const edm::EventSetup* eventSetup_, float w0, float mult)
+{
+  float e_5x5 = e5x5( cluster, recHits, topology );
+  float covEtaEta, covEtaPhi, covPhiPhi;
+  std::vector<float> v_thr;
+  std::vector<float> v_eta;
+  std::vector<float> v_phi;
+
+  if (e_5x5 >= 0.) {
+
+    const std::vector< std::pair<DetId, float> >& v_id = cluster.hitsAndFractions();
+    std::pair<float,float> mean5x5PosInNrCrysFromSeed =  mean5x5PositionInLocalCrysCoord( cluster, recHits, topology );
+    std::pair<float,float> mean5x5XYPos =  mean5x5PositionInXY(cluster,recHits,topology);
+
+    // now we can calculate the covariances                                                                                                                             
+    double numeratorEtaEta = 0;
+    double numeratorEtaPhi = 0;
+    double numeratorPhiPhi = 0;
+    double denominator     = 0;
+
+    //these allow us to scale the localCov by the crystal size                                                                                                          
+    //so that the localCovs have the same average value as the normal covs                                                                                              
+    const double barrelCrysSize = 0.01745; //approximate size of crystal in eta,phi in barrel                                                                           
+    const double endcapCrysSize = 0.0447; //the approximate crystal size sigmaEtaEta was corrected to in the endcap   
+
+    DetId seedId = getMaximum( v_id, recHits ).first;
+    bool isBarrel=seedId.subdetId()==EcalBarrel;
+    const double crysSize = isBarrel ? barrelCrysSize : endcapCrysSize;
+
+    CaloRectangle rectangle{-2, 2, -2, 2};
+
+    for (auto const& detId : rectangle(seedId, *topology)) {
+      float frac = getFraction(v_id,detId);
+      float energy = recHitEnergy( detId, recHits )*frac;
+
+      double detEta = 99;
+      double detPhi = 99;
+
+      if (detId.rawId() != 0 ) {
+	if (geometry) {
+	  const CaloSubdetectorGeometry *geo = geometry->getSubdetectorGeometry(detId);
+	  if(geo->getGeometry(detId) !=nullptr){
+
+	    GlobalPoint position = geo->getGeometry(detId)->getPosition();
+
+	    detEta = position.eta();
+	    detPhi = position.phi();
+
+	  }
+	}
+      }
+      v_eta.push_back(detEta) ;
+      v_phi.push_back(detPhi) ;
+      edm::ESHandle<EcalPFRecHitThresholds> ths;
+      (*eventSetup_).get<EcalPFRecHitThresholdsRcd>().get(ths);
+      float threshold = (*ths)[detId];
+      v_thr.push_back(threshold) ;
+      if ( energy <= (threshold * mult) ) continue;
+      float dEta = getNrCrysDiffInEta(detId,seedId) - mean5x5PosInNrCrysFromSeed.first;
+      float dPhi = 0;
+
+      if(isBarrel)  dPhi = getNrCrysDiffInPhi(detId,seedId) - mean5x5PosInNrCrysFromSeed.second;
+      else dPhi = getDPhiEndcap(detId,mean5x5XYPos.first,mean5x5XYPos.second);
+
+      double w = std::max(0.0f,w0 + std::log( energy / e_5x5 ));
+
+      denominator += w;
+      numeratorEtaEta += w * dEta * dEta;
+      numeratorEtaPhi += w * dEta * dPhi;
+      numeratorPhiPhi += w * dPhi * dPhi;
+    }
+
+    //multiplying by crysSize to make the values compariable to normal covariances                                                                                      
+    if (denominator != 0.0) {
+      covEtaEta =  crysSize*crysSize* numeratorEtaEta / denominator;
+      covEtaPhi =  crysSize*crysSize* numeratorEtaPhi / denominator;
+      covPhiPhi =  crysSize*crysSize* numeratorPhiPhi / denominator;
+    } else {
+      covEtaEta = 999.9;
+      covEtaPhi = 999.9;
+      covPhiPhi = 999.9;
+    }
+
+  } else {
+    // Warn the user if there was no energy in the cells and return zeroes.                                                                                             
+    covEtaEta = 0;
+    covEtaPhi = 0;
+    covPhiPhi = 0;
+  }
+  std::vector<float> v;
+  v.push_back( covEtaEta );
+  v.push_back( covEtaPhi );
+  v.push_back( covPhiPhi );
+
+  return {v,v_thr,v_eta,v_phi} ;
+
 }
 
 template<bool noZS>

@@ -391,6 +391,8 @@ class GsfElectron : public RecoCandidate
       float sigmaEtaEta ;        // weighted cluster rms along eta and inside 5x5 (absolute eta)
       float sigmaIetaIeta ;      // weighted cluster rms along eta and inside 5x5 (Xtal eta)
       float sigmaIphiIphi ;      // weighted cluster rms along phi and inside 5x5 (Xtal phi)
+      float sigmaIetaIeta_NoiseCleaned ;      // weighted cluster rms along eta and inside 5x5 (Xtal eta), with PF recHit thresholds applied
+      float sigmaIphiIphi_NoiseCleaned ;      // weighted cluster rms along phi and inside 5x5 (Xtal phi), with PF recHit thresholds applied  
       float e1x5 ;               // energy inside 1x5 in etaxphi around the seed Xtal
       float e2x5Max ;            // energy inside 2x5 in etaxphi around the seed Xtal (max bwt the 2 possible sums)
       float e5x5 ;               // energy inside 5x5 in etaxphi around the seed Xtal
@@ -402,6 +404,7 @@ class GsfElectron : public RecoCandidate
       float hcalDepth2OverEcalBc ; // hcal over ecal seed cluster energy using 2nd hcal depth (using hcal towers behind clusters)
       bool  invalidHcal ;          // set to true if the hcal energy estimate is not valid (e.g. the corresponding tower was off or masked)
       float sigmaIetaIphi;
+      float sigmaIetaIphi_NoiseCleaned;
       float eMax;
       float e2nd;
       float eTop;
@@ -416,12 +419,15 @@ class GsfElectron : public RecoCandidate
        : sigmaEtaEta(std::numeric_limits<float>::max()),
        sigmaIetaIeta(std::numeric_limits<float>::max()),
        sigmaIphiIphi(std::numeric_limits<float>::max()),
+       sigmaIetaIeta_NoiseCleaned(std::numeric_limits<float>::max()),
+       sigmaIphiIphi_NoiseCleaned(std::numeric_limits<float>::max()),
 	     e1x5(0.), e2x5Max(0.), e5x5(0.),
 	     r9(-std::numeric_limits<float>::max()),
        hcalDepth1OverEcal(0.), hcalDepth2OverEcal(0.),
        hcalDepth1OverEcalBc(0.), hcalDepth2OverEcalBc(0.),
        invalidHcal(false),
        sigmaIetaIphi(0.f),
+       sigmaIetaIphi_NoiseCleaned(0.f),
        eMax(0.f),
        e2nd(0.f),
        eTop(0.f),
@@ -439,6 +445,8 @@ class GsfElectron : public RecoCandidate
     float sigmaEtaEta() const { return showerShape_.sigmaEtaEta ; }
     float sigmaIetaIeta() const { return showerShape_.sigmaIetaIeta ; }
     float sigmaIphiIphi() const { return showerShape_.sigmaIphiIphi ; }
+    float sigmaIetaIeta_NoiseCleaned() const { return showerShape_.sigmaIetaIeta_NoiseCleaned ; }
+    float sigmaIphiIphi_NoiseCleaned() const { return showerShape_.sigmaIphiIphi_NoiseCleaned ; }
     float e1x5() const { return showerShape_.e1x5 ; }
     float e2x5Max() const { return showerShape_.e2x5Max ; }
     float e5x5() const { return showerShape_.e5x5 ; }
@@ -461,6 +469,8 @@ class GsfElectron : public RecoCandidate
     float full5x5_sigmaEtaEta() const { return full5x5_showerShape_.sigmaEtaEta ; }
     float full5x5_sigmaIetaIeta() const { return full5x5_showerShape_.sigmaIetaIeta ; }
     float full5x5_sigmaIphiIphi() const { return full5x5_showerShape_.sigmaIphiIphi ; }
+    float full5x5_sigmaIetaIeta_NoiseCleaned() const { return full5x5_showerShape_.sigmaIetaIeta_NoiseCleaned ; }
+    float full5x5_sigmaIphiIphi_NoiseCleaned() const { return full5x5_showerShape_.sigmaIphiIphi_NoiseCleaned ; }
     float full5x5_e1x5() const { return full5x5_showerShape_.e1x5 ; }
     float full5x5_e2x5Max() const { return full5x5_showerShape_.e2x5Max ; }
     float full5x5_e5x5() const { return full5x5_showerShape_.e5x5 ; }

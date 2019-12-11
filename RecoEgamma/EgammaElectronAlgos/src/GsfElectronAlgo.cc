@@ -217,9 +217,8 @@ template<bool full5x5>
 void GsfElectronAlgo::calculateShowerShape( const reco::SuperClusterRef & theClus,
                                             ElectronHcalHelper const& hcalHelper,
                                             reco::GsfElectron::ShowerShape & showerShape,
-                                            EventData const& eventData)
+                                            EventData const& eventData,const edm::EventSetup& iSetup)
  {
-
   using ClusterTools = EcalClusterToolsT<full5x5>;
 
   const reco::CaloCluster & seedCluster = *(theClus->seed()) ;
@@ -247,9 +246,15 @@ void GsfElectronAlgo::calculateShowerShape( const reco::SuperClusterRef & theClu
 
   std::vector<float> covariances = ClusterTools::covariances(seedCluster,recHits,topology,geometry) ;
   std::vector<float> localCovariances = ClusterTools::localCovariances(seedCluster,recHits,topology) ;
+  std::vector<float> localCovariances_NoiseCleaned = ClusterTools::localCovariances_NoiseCleaned(seedCluster,recHits,topology,geometry,&iSetup).cov ;
+
   showerShape.sigmaEtaEta = sqrt(covariances[0]) ;
   showerShape.sigmaIetaIeta = sqrt(localCovariances[0]) ;
+  showerShape.sigmaIetaIeta_NoiseCleaned = sqrt(localCovariances_NoiseCleaned[0]) ;
+
   if (!edm::isNotFinite(localCovariances[2])) showerShape.sigmaIphiIphi = sqrt(localCovariances[2]) ;
+  if (!edm::isNotFinite(localCovariances_NoiseCleaned[2])) showerShape.sigmaIphiIphi_NoiseCleaned = sqrt(localCovariances_NoiseCleaned[2]) ;
+
   showerShape.e1x5 = ClusterTools::e1x5(seedCluster,recHits,topology)  ;
   showerShape.e2x5Max = ClusterTools::e2x5Max(seedCluster,recHits,topology)  ;
   showerShape.e5x5 = ClusterTools::e5x5(seedCluster,recHits,topology) ;
@@ -275,6 +280,19 @@ void GsfElectronAlgo::calculateShowerShape( const reco::SuperClusterRef & theClu
   } else {
     showerShape.sigmaIetaIphi = -1.f;
   }
+
+
+  // extra shower shapes NoiseCleaned
+  const float see_by_spp_NoiseCleaned = showerShape.sigmaIetaIeta_NoiseCleaned*showerShape.sigmaIphiIphi_NoiseCleaned;
+  if(  see_by_spp_NoiseCleaned > 0 ) {
+    showerShape.sigmaIetaIphi_NoiseCleaned = localCovariances_NoiseCleaned[1] / see_by_spp_NoiseCleaned;
+  } else if ( localCovariances_NoiseCleaned[1] > 0 ) {
+    showerShape.sigmaIetaIphi_NoiseCleaned = 1.f;
+  } else {
+    showerShape.sigmaIetaIphi_NoiseCleaned = -1.f;
+  }
+
+
   showerShape.eMax          = ClusterTools::eMax(seedCluster,recHits);
   showerShape.e2nd          = ClusterTools::e2nd(seedCluster,recHits);
   showerShape.eTop          = ClusterTools::eTop(seedCluster,recHits,topology);
@@ -437,7 +455,7 @@ GsfElectronAlgo::EventData GsfElectronAlgo::beginEvent( edm::Event const& event 
 void GsfElectronAlgo::completeElectrons( reco::GsfElectronCollection & electrons,
                                          edm::Event const& event,
                                          edm::EventSetup const& eventSetup,
-                                         const gsfAlgoHelpers::HeavyObjectCache* hoc )
+                                         const gsfAlgoHelpers::HeavyObjectCache* hoc,const edm::EventSetup& iSetup )
  {
   checkSetup(eventSetup);
   auto eventData = beginEvent(event);
@@ -467,7 +485,7 @@ void GsfElectronAlgo::completeElectrons( reco::GsfElectronCollection & electrons
     // calculate and check Trajectory StatesOnSurface....
     if ( !electronData.calculateTSOS( *eventSetupData_.mtsTransform, *eventSetupData_.constraintAtVtx ) ) continue ;
 
-    createElectron(electrons, electronData, eventData, hoc) ;
+    createElectron(electrons, electronData, eventData, hoc, iSetup) ;
 
    } // loop over tracks
 
@@ -570,7 +588,7 @@ void GsfElectronAlgo::setCutBasedPreselectionFlag( GsfElectron & ele, const reco
  }
 
 
-void GsfElectronAlgo::createElectron(reco::GsfElectronCollection & electrons, ElectronData & electronData, EventData & eventData, const gsfAlgoHelpers::HeavyObjectCache* hoc)
+void GsfElectronAlgo::createElectron(reco::GsfElectronCollection & electrons, ElectronData & electronData, EventData & eventData, const gsfAlgoHelpers::HeavyObjectCache* hoc,const edm::EventSetup& iSetup)
  {
   // eventually check ctf track
   if (generalData_.strategyCfg.ctfTracksCheck && electronData.ctfTrackRef.isNull()) {
@@ -712,8 +730,8 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection & electrons, El
   if( !EcalTools::isHGCalDet((DetId::Detector)region) ) {
     const bool pflow = !(electronData.coreRef->ecalDrivenSeed());
     auto const& hcalHelper = pflow ? generalData_.hcalHelperPflow : generalData_.hcalHelper;
-    calculateShowerShape<false>(electronData.superClusterRef,hcalHelper,showerShape,eventData) ;    
-    calculateShowerShape<true>(electronData.superClusterRef,hcalHelper,full5x5_showerShape,eventData) ;
+    calculateShowerShape<false>(electronData.superClusterRef,hcalHelper,showerShape,eventData,iSetup) ;    
+    calculateShowerShape<true>(electronData.superClusterRef,hcalHelper,full5x5_showerShape,eventData,iSetup) ;
   }
 
   //====================================================
