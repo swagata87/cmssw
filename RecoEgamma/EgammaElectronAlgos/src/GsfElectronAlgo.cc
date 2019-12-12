@@ -455,7 +455,7 @@ GsfElectronAlgo::EventData GsfElectronAlgo::beginEvent( edm::Event const& event 
 void GsfElectronAlgo::completeElectrons( reco::GsfElectronCollection & electrons,
                                          edm::Event const& event,
                                          edm::EventSetup const& eventSetup,
-                                         const gsfAlgoHelpers::HeavyObjectCache* hoc,const edm::EventSetup& iSetup )
+                                         const gsfAlgoHelpers::HeavyObjectCache* hoc)
  {
   checkSetup(eventSetup);
   auto eventData = beginEvent(event);
@@ -485,7 +485,7 @@ void GsfElectronAlgo::completeElectrons( reco::GsfElectronCollection & electrons
     // calculate and check Trajectory StatesOnSurface....
     if ( !electronData.calculateTSOS( *eventSetupData_.mtsTransform, *eventSetupData_.constraintAtVtx ) ) continue ;
 
-    createElectron(electrons, electronData, eventData, hoc, iSetup) ;
+    createElectron(electrons, electronData, eventData, hoc, eventSetup) ;
 
    } // loop over tracks
 

@@ -209,7 +209,7 @@ class GsfElectronAlgo {
     void completeElectrons( reco::GsfElectronCollection & electrons, // do not redo cloned electrons done previously
                             edm::Event const& event,
                             edm::EventSetup const& eventSetup,
-                            const gsfAlgoHelpers::HeavyObjectCache* hoc,const edm::EventSetup& iSetup);
+                            const gsfAlgoHelpers::HeavyObjectCache* hoc);
 
   private :
 
