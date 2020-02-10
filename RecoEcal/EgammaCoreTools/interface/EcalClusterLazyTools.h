@@ -216,7 +216,7 @@ class EcalClusterLazyToolsT : public EcalClusterLazyToolsBase {
         { return ClusterTools::localCovariances( cluster, getEcalRecHitCollection(cluster), topology_, w0 ); }
 
     std::vector<float> localCovariances_NoiseCleaned(const reco::BasicCluster &cluster, const edm::EventSetup* eventSetup_ ,float w0 = 4.7, float mult=1.0)
-      { return ClusterTools::localCovariancesnew( cluster, getEcalRecHitCollection(cluster), topology_, geometry_, eventSetup_, w0, mult); }
+      { return ClusterTools::localCovariances_NoiseCleaned( cluster, getEcalRecHitCollection(cluster), topology_, geometry_, eventSetup_, w0, mult); }
 
     std::vector<float> scLocalCovariances(const reco::SuperCluster &cluster, float w0 = 4.7)
         { return ClusterTools::scLocalCovariances( cluster, getEcalRecHitCollection(cluster), topology_, w0 ); }
