@@ -116,11 +116,12 @@ def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False, out
             process.ecalDrivenGsfElectronsFromTICL_step.insert(iModule, l_module[iModule])
     
     
-    # Like process.FEVTDEBUGHLTEventContent.outputCommands
-    outputCommands.extend([
-        "keep *_*FromTICL*_*_*",
-    ])
-    
+    if (outputCommands is not None) :
+        
+        # Like process.FEVTDEBUGHLTEventContent.outputCommands
+        outputCommands.extend([
+            "keep *_*FromTICL*_*_*",
+        ])    
     
     return process
 
