@@ -7,7 +7,7 @@ from RecoEgamma.EgammaElectronProducers.ecalDrivenElectronSeeds_cfi import *
 from RecoParticleFlow.PFTracking.mergedElectronSeeds_cfi import *
 from TrackingTools.GsfTracking.CkfElectronCandidateMaker_cff import *
 from TrackingTools.GsfTracking.GsfElectronGsfFit_cff import *
-from RecoEgamma.EgammaElectronProducers.gsfElectronCores_cfi import *
+#from RecoEgamma.EgammaElectronProducers.gsfElectronCores_cfi import *
 from RecoEgamma.EgammaElectronProducers.gsfElectrons_cfi import *
 from RecoTracker.IterativeTracking.ElectronSeeds_cff import *
 from RecoEgamma.EgammaElectronProducers.ecalDrivenGsfElectronCoresFromMultiCl_cff import *
