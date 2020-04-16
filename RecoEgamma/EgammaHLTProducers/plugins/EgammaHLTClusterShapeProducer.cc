@@ -90,7 +90,8 @@ void EgammaHLTClusterShapeProducer::produce(edm::StreamID sid,
     std::vector<float> vCov;
     double sigmaee;
     if (EtaOrIeta_) {
-      vCov = lazyTools.localCovariances(*(recoecalcandref->superCluster()->seed()));
+      //vCov = lazyTools.localCovariances(*(recoecalcandref->superCluster()->seed()));
+      vCov = lazyTools.localCovariances_NoiseCleaned(*(recoecalcandref->superCluster()->seed()), &iSetup);
       sigmaee = sqrt(vCov[0]);
     } else {
       vCov = lazyTools.covariances(*(recoecalcandref->superCluster()->seed()));
@@ -100,7 +101,9 @@ void EgammaHLTClusterShapeProducer::produce(edm::StreamID sid,
         sigmaee = sigmaee - 0.02 * (EtaSC - 2.3);
     }
 
-    double sigmaee5x5 = sqrt(lazyTools5x5.localCovariances(*(recoecalcandref->superCluster()->seed()))[0]);
+    //double sigmaee5x5 = sqrt(lazyTools5x5.localCovariances(*(recoecalcandref->superCluster()->seed()))[0]);
+    double sigmaee5x5 = sqrt(lazyTools5x5.localCovariances_NoiseCleaned(*(recoecalcandref->superCluster()->seed()),&iSetup)[0]);
+    
     clshMap.insert(recoecalcandref, sigmaee);
     clsh5x5Map.insert(recoecalcandref, sigmaee5x5);
   }
