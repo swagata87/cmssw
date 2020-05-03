@@ -905,7 +905,7 @@ std::pair<float, float> EcalClusterToolsT<noZS>::mean5x5PositionInLocalCrysCoord
   float energySum = 0.;
 
   const std::vector<std::pair<DetId, float>> &hsAndFs = cluster.hitsAndFractions();
-  std::vector<DetId> v_id = matrixDetId(topology, seedId, 2);
+  std::vector<DetId> v_id = matrixDetId(topology, seedId, 1); //swagata, doing 2->1 in last arguement, which results in 5x5 to 3x3
   for (const std::pair<DetId, float> &hAndF : hsAndFs) {
     for (std::vector<DetId>::const_iterator it = v_id.begin(); it != v_id.end(); ++it) {
       if (hAndF.first != *it && !noZS)
@@ -944,7 +944,7 @@ std::pair<float, float> EcalClusterToolsT<noZS>::mean5x5PositionInXY(const reco:
   float energySum = 0.;
 
   const std::vector<std::pair<DetId, float>> &hsAndFs = cluster.hitsAndFractions();
-  std::vector<DetId> v_id = matrixDetId(topology, seedId, 2);
+  std::vector<DetId> v_id = matrixDetId(topology, seedId, 1); // swagata, doing 2->1 in last arguement, results in 5x5 to 3x3
   for (const std::pair<DetId, float> &hAndF : hsAndFs) {
     for (std::vector<DetId>::const_iterator it = v_id.begin(); it != v_id.end(); ++it) {
       if (hAndF.first != *it && !noZS)
@@ -1148,7 +1148,7 @@ std::vector<float> EcalClusterToolsT<noZS>::localCovariances(const reco::BasicCl
                                                              const EcalRecHitCollection *recHits,
                                                              const CaloTopology *topology,
                                                              float w0) {
-  float e_5x5 = e5x5(cluster, recHits, topology);
+  float e_5x5 = e3x3(cluster, recHits, topology); //swagata e5x5 -> e3x3, sorry about keeping the variable name same.. this is just for a quick check //
   float covEtaEta, covEtaPhi, covPhiPhi;
 
   if (e_5x5 >= 0.) {
@@ -1173,7 +1173,8 @@ std::vector<float> EcalClusterToolsT<noZS>::localCovariances(const reco::BasicCl
     bool isBarrel = seedId.subdetId() == EcalBarrel;
     const double crysSize = isBarrel ? barrelCrysSize : endcapCrysSize;
 
-    CaloRectangle rectangle{-2, 2, -2, 2};
+    //    CaloRectangle rectangle{-2, 2, -2, 2};
+    CaloRectangle rectangle{-1, 1, -1, 1}; //swagata
     for (auto const &detId : rectangle(seedId, *topology)) {
       float frac = getFraction(v_id, detId);
       float energy = recHitEnergy(detId, recHits) * frac;
