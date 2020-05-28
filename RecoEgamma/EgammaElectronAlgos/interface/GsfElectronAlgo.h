@@ -218,7 +218,8 @@ private:
                       CaloGeometry const& geometry,
                       MultiTrajectoryStateTransform const& mtsTransform,
                       double magneticFieldInTesla,
-                      const HeavyObjectCache*);
+                      const HeavyObjectCache*,
+		      const edm::EventSetup& es);
 
   void setCutBasedPreselectionFlag(reco::GsfElectron& ele, const reco::BeamSpot&) const;
 
@@ -227,7 +228,9 @@ private:
                                                       ElectronHcalHelper const& hcalHelper,
                                                       EventData const& eventData,
                                                       CaloTopology const& topology,
-                                                      CaloGeometry const& geometry) const;
+                                                      CaloGeometry const& geometry,
+						      const edm::EventSetup& es) const;
+
   reco::GsfElectron::SaturationInfo calculateSaturationInfo(const reco::SuperClusterRef&,
                                                             EventData const& eventData) const;
 

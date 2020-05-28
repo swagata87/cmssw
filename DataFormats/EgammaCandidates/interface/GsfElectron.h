@@ -358,6 +358,7 @@ namespace reco {
     struct ShowerShape {
       float sigmaEtaEta;         // weighted cluster rms along eta and inside 5x5 (absolute eta)
       float sigmaIetaIeta;       // weighted cluster rms along eta and inside 5x5 (Xtal eta)
+      float sigmaIetaIetaNC;     // weighted cluster rms along eta and inside 5x5 (Xtal eta), Noise cleaned
       float sigmaIphiIphi;       // weighted cluster rms along phi and inside 5x5 (Xtal phi)
       float e1x5;                // energy inside 1x5 in etaxphi around the seed Xtal
       float e2x5Max;             // energy inside 2x5 in etaxphi around the seed Xtal (max bwt the 2 possible sums)
@@ -433,6 +434,7 @@ namespace reco {
     // ecal energy is always that from the full 5x5
     float full5x5_sigmaEtaEta() const { return full5x5_showerShape_.sigmaEtaEta; }
     float full5x5_sigmaIetaIeta() const { return full5x5_showerShape_.sigmaIetaIeta; }
+    float full5x5_sigmaIetaIetaNC() const { return full5x5_showerShape_.sigmaIetaIetaNC; }
     float full5x5_sigmaIphiIphi() const { return full5x5_showerShape_.sigmaIphiIphi; }
     float full5x5_e1x5() const { return full5x5_showerShape_.e1x5; }
     float full5x5_e2x5Max() const { return full5x5_showerShape_.e2x5Max; }

@@ -55,6 +55,8 @@
 #include "Geometry/CaloTopology/interface/CaloTopology.h"
 #include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
 #include "Geometry/EcalAlgo/interface/EcalBarrelGeometry.h"
+#include "CondFormats/EcalObjects/interface/EcalPFRecHitThresholds.h"
+#include "CondFormats/DataRecord/interface/EcalPFRecHitThresholdsRcd.h"
 
 class DetId;
 class CaloTopology;
@@ -200,6 +202,14 @@ public:
                                              const EcalRecHitCollection *recHits,
                                              const CaloTopology *topology,
                                              float w0 = 4.7);
+
+  // ECAL noise cleaning done using PF RecHit thresholds, important for endcaps
+  static std::vector<float> localCovariancesNC(const reco::BasicCluster &cluster,
+                                             const EcalRecHitCollection *recHits,
+                                             const CaloTopology *topology,
+					     const edm::EventSetup *eventSetup_,
+					     float w0 = 4.7,
+					     float mult=1.0);
 
   static std::vector<float> scLocalCovariances(const reco::SuperCluster &cluster,
                                                const EcalRecHitCollection *recHits,
@@ -1066,6 +1076,90 @@ std::vector<float> EcalClusterToolsT<noZS>::localCovariances(const reco::BasicCl
       float energy = recHitEnergy(detId, recHits) * frac;
       if (energy <= 0)
         continue;
+
+      float dEta = getNrCrysDiffInEta(detId, seedId) - mean5x5PosInNrCrysFromSeed.first;
+      float dPhi = 0;
+
+      if (isBarrel)
+        dPhi = getNrCrysDiffInPhi(detId, seedId) - mean5x5PosInNrCrysFromSeed.second;
+      else
+        dPhi = getDPhiEndcap(detId, mean5x5XYPos.first, mean5x5XYPos.second);
+
+      double w = std::max(0.0f, w0 + std::log(energy / e_5x5));
+
+      denominator += w;
+      numeratorEtaEta += w * dEta * dEta;
+      numeratorEtaPhi += w * dEta * dPhi;
+      numeratorPhiPhi += w * dPhi * dPhi;
+    }
+
+    //multiplying by crysSize to make the values compariable to normal covariances
+    if (denominator != 0.0) {
+      covEtaEta = crysSize * crysSize * numeratorEtaEta / denominator;
+      covEtaPhi = crysSize * crysSize * numeratorEtaPhi / denominator;
+      covPhiPhi = crysSize * crysSize * numeratorPhiPhi / denominator;
+    } else {
+      covEtaEta = 999.9;
+      covEtaPhi = 999.9;
+      covPhiPhi = 999.9;
+    }
+
+  } else {
+    // Warn the user if there was no energy in the cells and return zeroes.
+    //       std::cout << "\ClusterShapeAlgo::Calculate_Covariances:  no energy in supplied cells.\n";
+    covEtaEta = 0;
+    covEtaPhi = 0;
+    covPhiPhi = 0;
+  }
+  std::vector<float> v;
+  v.push_back(covEtaEta);
+  v.push_back(covEtaPhi);
+  v.push_back(covPhiPhi);
+  return v;
+}
+
+//ECAL noise cleaned covariances 
+template <bool noZS>
+std::vector<float> EcalClusterToolsT<noZS>::localCovariancesNC(const reco::BasicCluster &cluster,
+                                                             const EcalRecHitCollection *recHits,
+                                                             const CaloTopology *topology,
+							     const edm::EventSetup *eventSetup_,
+							     float w0,
+							     float mult) {
+  float e_5x5 = e5x5(cluster, recHits, topology);
+  float covEtaEta, covEtaPhi, covPhiPhi;
+
+  if (e_5x5 >= 0.) {
+    //double w0_ = parameterMap_.find("W0")->second;
+    const std::vector<std::pair<DetId, float>> &v_id = cluster.hitsAndFractions();
+    std::pair<float, float> mean5x5PosInNrCrysFromSeed = mean5x5PositionInLocalCrysCoord(cluster, recHits, topology);
+    std::pair<float, float> mean5x5XYPos = mean5x5PositionInXY(cluster, recHits, topology);
+
+    // now we can calculate the covariances
+    double numeratorEtaEta = 0;
+    double numeratorEtaPhi = 0;
+    double numeratorPhiPhi = 0;
+    double denominator = 0;
+
+    //these allow us to scale the localCov by the crystal size
+    //so that the localCovs have the same average value as the normal covs
+    const double barrelCrysSize = 0.01745;  //approximate size of crystal in eta,phi in barrel
+    const double endcapCrysSize = 0.0447;   //the approximate crystal size sigmaEtaEta was corrected to in the endcap
+
+    DetId seedId = getMaximum(v_id, recHits).first;
+
+    bool isBarrel = seedId.subdetId() == EcalBarrel;
+    const double crysSize = isBarrel ? barrelCrysSize : endcapCrysSize;
+
+    CaloRectangle rectangle{-2, 2, -2, 2};
+    for (auto const &detId : rectangle(seedId, *topology)) {
+      float frac = getFraction(v_id, detId);
+      float energy = recHitEnergy(detId, recHits) * frac;
+
+      edm::ESHandle<EcalPFRecHitThresholds> ths;
+      (*eventSetup_).get<EcalPFRecHitThresholdsRcd>().get(ths);
+      float threshold = (*ths)[detId];
+      if ( energy <= (threshold * mult) ) continue;
 
       float dEta = getNrCrysDiffInEta(detId, seedId) - mean5x5PosInNrCrysFromSeed.first;
       float dPhi = 0;

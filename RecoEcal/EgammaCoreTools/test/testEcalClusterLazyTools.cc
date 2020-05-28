@@ -105,6 +105,8 @@ void testEcalClusterLazyTools::analyze(const edm::Event& ev, const edm::EventSet
     std::cout << "covariances.............. " << vCov[0] << " " << vCov[1] << " " << vCov[2] << std::endl;
     std::vector<float> vLocCov = lazyTools.localCovariances(clus);
     std::cout << "local covariances........ " << vLocCov[0] << " " << vLocCov[1] << " " << vLocCov[2] << std::endl;
+    std::vector<float> vLocCovNC = lazyTools.localCovariancesNC(clus,&es);
+    std::cout << "local covariancesNC........ " << vLocCovNC[0] << " " << vLocCovNC[1] << " " << vLocCovNC[2] << std::endl;
     std::cout << "zernike20................ " << lazyTools.zernike20(clus) << std::endl;
     std::cout << "zernike42................ " << lazyTools.zernike42(clus) << std::endl;
   }
@@ -135,6 +137,8 @@ void testEcalClusterLazyTools::analyze(const edm::Event& ev, const edm::EventSet
     std::cout << "covariances.............. " << vCov[0] << " " << vCov[1] << " " << vCov[2] << std::endl;
     std::vector<float> vLocCov = lazyTools.localCovariances(clus);
     std::cout << "local covariances........ " << vLocCov[0] << " " << vLocCov[1] << " " << vLocCov[2] << std::endl;
+    std::vector<float> vLocCovNC = lazyTools.localCovariancesNC(clus,&es);
+    std::cout << "local covariancesNC........ " << vLocCovNC[0] << " " << vLocCovNC[1] << " " << vLocCovNC[2] << std::endl;
     std::cout << "zernike20................ " << lazyTools.zernike20(clus) << std::endl;
     std::cout << "zernike42................ " << lazyTools.zernike42(clus) << std::endl;
   }

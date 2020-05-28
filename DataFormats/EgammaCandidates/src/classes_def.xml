@@ -165,7 +165,8 @@
   <class name="reco::GsfElectron::FiducialFlags" ClassVersion="10">
    <version ClassVersion="10" checksum="2564471186"/>
   </class>
-  <class name="reco::GsfElectron::ShowerShape" ClassVersion="14">
+  <class name="reco::GsfElectron::ShowerShape" ClassVersion="15">
+   <version ClassVersion="15" checksum="3139451599"/>
    <version ClassVersion="14" checksum="1877043619"/>
    <version ClassVersion="13" checksum="1955217576"/>
    <version ClassVersion="12" checksum="1486422105"/>

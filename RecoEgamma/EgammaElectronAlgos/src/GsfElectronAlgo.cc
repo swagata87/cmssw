@@ -286,7 +286,8 @@ reco::GsfElectron::ShowerShape GsfElectronAlgo::calculateShowerShape(const reco:
                                                                      ElectronHcalHelper const& hcalHelper,
                                                                      EventData const& eventData,
                                                                      CaloTopology const& topology,
-                                                                     CaloGeometry const& geometry) const {
+                                                                     CaloGeometry const& geometry,
+								     const edm::EventSetup& es) const {
   using ClusterTools = EcalClusterToolsT<full5x5>;
   reco::GsfElectron::ShowerShape showerShape;
 
@@ -310,8 +311,10 @@ reco::GsfElectron::ShowerShape GsfElectronAlgo::calculateShowerShape(const reco:
 
   std::vector<float> covariances = ClusterTools::covariances(seedCluster, recHits, &topology, &geometry);
   std::vector<float> localCovariances = ClusterTools::localCovariances(seedCluster, recHits, &topology);
+  std::vector<float> localCovariancesNC = ClusterTools::localCovariancesNC(seedCluster, recHits, &topology, &es);
   showerShape.sigmaEtaEta = sqrt(covariances[0]);
   showerShape.sigmaIetaIeta = sqrt(localCovariances[0]);
+  showerShape.sigmaIetaIetaNC = sqrt(localCovariancesNC[0]);
   if (!edm::isNotFinite(localCovariances[2]))
     showerShape.sigmaIphiIphi = sqrt(localCovariances[2]);
   showerShape.e1x5 = ClusterTools::e1x5(seedCluster, recHits, &topology);
@@ -560,7 +563,7 @@ reco::GsfElectronCollection GsfElectronAlgo::completeElectrons(edm::Event const&
       continue;
 
     createElectron(
-        electrons, electronData, eventData, caloTopology, caloGeometry, mtsTransform, magneticFieldInTesla, hoc);
+		   electrons, electronData, eventData, caloTopology, caloGeometry, mtsTransform, magneticFieldInTesla, hoc, eventSetup);
 
   }  // loop over tracks
   return electrons;
@@ -691,7 +694,8 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection& electrons,
                                      CaloGeometry const& geometry,
                                      MultiTrajectoryStateTransform const& mtsTransform,
                                      double magneticFieldInTesla,
-                                     const GsfElectronAlgo::HeavyObjectCache* hoc) {
+                                     const GsfElectronAlgo::HeavyObjectCache* hoc,
+				     const edm::EventSetup& es) {
   // eventually check ctf track
   if (cfg_.strategy.ctfTracksCheck && electronData.ctfTrackRef.isNull()) {
     electronData.ctfTrackRef = egamma::getClosestCtfToGsf(electronData.gsfTrackRef, eventData.currentCtfTracks).first;
@@ -825,9 +829,9 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection& electrons,
   reco::GsfElectron::ShowerShape showerShape;
   reco::GsfElectron::ShowerShape full5x5_showerShape;
   if (!EcalTools::isHGCalDet((DetId::Detector)region)) {
-    showerShape = calculateShowerShape<false>(electronData.superClusterRef, hcalHelper_, eventData, topology, geometry);
+    showerShape = calculateShowerShape<false>(electronData.superClusterRef, hcalHelper_, eventData, topology, geometry, es);
     full5x5_showerShape =
-        calculateShowerShape<true>(electronData.superClusterRef, hcalHelper_, eventData, topology, geometry);
+      calculateShowerShape<true>(electronData.superClusterRef, hcalHelper_, eventData, topology, geometry, es);
   }
 
   //====================================================
