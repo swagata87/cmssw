@@ -209,7 +209,7 @@ public:
                                              const CaloTopology *topology,
 					     const edm::EventSetup *eventSetup_,
 					     float w0 = 4.7,
-					     float mult=1.0);
+					     float mult=1.25);
 
   static std::vector<float> scLocalCovariances(const reco::SuperCluster &cluster,
                                                const EcalRecHitCollection *recHits,

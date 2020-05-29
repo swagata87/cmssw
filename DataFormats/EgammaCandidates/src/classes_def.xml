@@ -38,7 +38,8 @@
   <class name="reco::Photon::FiducialFlags" ClassVersion="10">
    <version ClassVersion="10" checksum="2148735796"/>
   </class>
-  <class name="reco::Photon::ShowerShape" ClassVersion="14">
+  <class name="reco::Photon::ShowerShape" ClassVersion="15">
+    <version ClassVersion="15" checksum="3398947609"/>
     <version ClassVersion="14" checksum="228715893"/>
     <version ClassVersion="13" checksum="641067911"/>
    <version ClassVersion="12" checksum="1586705784"/>

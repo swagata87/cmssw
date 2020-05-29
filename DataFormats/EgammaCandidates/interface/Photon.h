@@ -137,6 +137,7 @@ namespace reco {
     struct ShowerShape {
       float sigmaEtaEta;
       float sigmaIetaIeta;
+      float sigmaIetaIetaNC;
       float e1x5;
       float e2x5;
       float e3x3;
@@ -169,6 +170,7 @@ namespace reco {
       ShowerShape()
           : sigmaEtaEta(std::numeric_limits<float>::max()),
             sigmaIetaIeta(std::numeric_limits<float>::max()),
+            sigmaIetaIetaNC(std::numeric_limits<float>::max()),
             e1x5(0.f),
             e2x5(0.f),
             e3x3(0.f),
@@ -247,6 +249,7 @@ namespace reco {
     float full5x5_maxEnergyXtal() const { return full5x5_showerShapeBlock_.maxEnergyXtal; }
     float full5x5_sigmaEtaEta() const { return full5x5_showerShapeBlock_.sigmaEtaEta; }
     float full5x5_sigmaIetaIeta() const { return full5x5_showerShapeBlock_.sigmaIetaIeta; }
+    float full5x5_sigmaIetaIetaNC() const { return full5x5_showerShapeBlock_.sigmaIetaIetaNC; }
     float full5x5_r1x5() const { return full5x5_showerShapeBlock_.e1x5 / full5x5_showerShapeBlock_.e5x5; }
     float full5x5_r2x5() const { return full5x5_showerShapeBlock_.e2x5 / full5x5_showerShapeBlock_.e5x5; }
     float full5x5_r9() const { return full5x5_showerShapeBlock_.e3x3 / this->superCluster()->rawEnergy(); }
