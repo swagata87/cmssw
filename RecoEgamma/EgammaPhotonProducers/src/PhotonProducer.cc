@@ -306,12 +306,9 @@ void PhotonProducer::fillPhotonCollection(edm::Event& evt,
         noZS::EcalClusterTools::covariances(*(scRef->seed()), &(*hits), &(*topology), geometry);
     std::vector<float> full5x5_locCov =
         noZS::EcalClusterTools::localCovariances(*(scRef->seed()), &(*hits), &(*topology));
-    std::vector<float> full5x5_locCovNC =
-      noZS::EcalClusterTools::localCovariancesNC(*(scRef->seed()), &(*hits), &(*topology),&es);
 
     float full5x5_sigmaEtaEta = sqrt(full5x5_cov[0]);
     float full5x5_sigmaIetaIeta = sqrt(full5x5_locCov[0]);
-    float full5x5_sigmaIetaIetaNC = sqrt(full5x5_locCovNC[0]);
 
     // compute position of ECAL shower
     math::XYZPoint caloPosition;
@@ -366,7 +363,6 @@ void PhotonProducer::fillPhotonCollection(edm::Event& evt,
     full5x5_showerShape.maxEnergyXtal = full5x5_maxXtal;
     full5x5_showerShape.sigmaEtaEta = full5x5_sigmaEtaEta;
     full5x5_showerShape.sigmaIetaIeta = full5x5_sigmaIetaIeta;
-    full5x5_showerShape.sigmaIetaIetaNC = full5x5_sigmaIetaIetaNC;
     newCandidate.full5x5_setShowerShapeVariables(full5x5_showerShape);
 
     /// get ecal photon specific corrected energy
