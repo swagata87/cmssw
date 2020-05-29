@@ -561,9 +561,13 @@ void GEDPhotonProducer::fillPhotonCollection(edm::Event& evt,
     std::vector<float> full5x5_locCov =
         (hits != nullptr ? noZS::EcalClusterTools::localCovariances(*(scRef->seed()), &(*hits), &(*topology))
                          : std::vector<float>({0.f, 0.f, 0.f}));
+    std::vector<float> full5x5_locCovNC =
+      (hits != nullptr ? noZS::EcalClusterTools::localCovariancesNC(*(scRef->seed()), &(*hits), &(*topology), &es)
+                         : std::vector<float>({0.f, 0.f, 0.f}));
 
     float full5x5_sigmaEtaEta = sqrt(full5x5_cov[0]);
     float full5x5_sigmaIetaIeta = sqrt(full5x5_locCov[0]);
+    float full5x5_sigmaIetaIetaNC = sqrt(full5x5_locCovNC[0]);
 
     // compute position of ECAL shower
     math::XYZPoint caloPosition = scRef->position();
@@ -677,6 +681,7 @@ void GEDPhotonProducer::fillPhotonCollection(edm::Event& evt,
     full5x5_showerShape.maxEnergyXtal = full5x5_maxXtal;
     full5x5_showerShape.sigmaEtaEta = full5x5_sigmaEtaEta;
     full5x5_showerShape.sigmaIetaIeta = full5x5_sigmaIetaIeta;
+    full5x5_showerShape.sigmaIetaIetaNC = full5x5_sigmaIetaIetaNC;
     /// fill extra full5x5 shower shapes
     const float full5x5_spp = (!edm::isFinite(full5x5_locCov[2]) ? 0. : sqrt(full5x5_locCov[2]));
     const float full5x5_sep = full5x5_locCov[1];
