@@ -350,7 +350,7 @@ void L1TPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   // Then get our alphas (globally)
   std::vector<float> puGlobals;
-  l1pualgo_->doPUGlobals(l1regions_.regions(), -1., puGlobals);  // FIXME we don't have yet an external PU estimate
+  l1pualgo_->doPUGlobals(l1regions_.regions(), z0, -1., puGlobals);  // FIXME we don't have yet an external PU estimate
   const std::vector<std::string>& puGlobalNames = l1pualgo_->puGlobalNames();
   if (puGlobals.size() != puGlobalNames.size())
     throw cms::Exception("LogicError", "Mismatch in the number of global pileup inputs");
@@ -363,7 +363,7 @@ void L1TPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
 
   // Then run puppi (regionally)
   for (auto& l1region : l1regions_.regions()) {
-    l1pualgo_->runNeutralsPU(l1region, -1., puGlobals);
+    l1pualgo_->runNeutralsPU(l1region, z0, -1., puGlobals);
   }
   // and save puppi
   iEvent.put(l1regions_.fetch(true), "Puppi");
