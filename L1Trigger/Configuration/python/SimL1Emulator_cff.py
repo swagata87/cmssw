@@ -162,9 +162,9 @@ _phase2_siml1emulator.add(l1PFJetsPhase1Task)
 # PF MET
 # ########################################################################
 from L1Trigger.Phase2L1ParticleFlow.l1pfJetMet_cff import *
+_phase2_siml1emulator.add(l1PFJetsTask)
 # Describe here l1PFMets Task
 # ###############################
-l1PFMetsTask = cms.Task(l1PFMetCalo , l1PFMetPF , l1PFMetPuppi)
 _phase2_siml1emulator.add(l1PFMetsTask)
 
 # NNTaus
