@@ -60,6 +60,8 @@ private:
 
   float emPtCut_, hadPtCut_;
 
+  bool sortOutputs_;
+
   l1tpf_impl::RegionMapper l1regions_;
   std::unique_ptr<l1tpf_impl::PFAlgoBase> l1pfalgo_;
   std::unique_ptr<l1tpf_impl::PUAlgoBase> l1pualgo_;
@@ -98,6 +100,7 @@ L1TPFProducer::L1TPFProducer(const edm::ParameterSet& iConfig)
       tkMuCands_(consumes<l1t::TkMuonCollection>(iConfig.getParameter<edm::InputTag>("tkMuons"))),
       emPtCut_(iConfig.getParameter<double>("emPtCut")),
       hadPtCut_(iConfig.getParameter<double>("hadPtCut")),
+      sortOutputs_(iConfig.getParameter<bool>("sortOutputs")),
       l1regions_(iConfig),
       l1pfalgo_(nullptr),
       l1pualgo_(nullptr),
@@ -348,9 +351,6 @@ void L1TPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
     l1pfalgo_->runPF(l1region);
     l1pualgo_->runChargedPV(l1region, z0);
   }
-  // save PF into the event
-  iEvent.put(l1regions_.fetch(false), "PF");
-
   // Then get our alphas (globally)
   std::vector<float> puGlobals;
   l1pualgo_->doPUGlobals(l1regions_.regions(), z0, -1., puGlobals);  // FIXME we don't have yet an external PU estimate
@@ -367,7 +367,12 @@ void L1TPFProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
   // Then run puppi (regionally)
   for (auto& l1region : l1regions_.regions()) {
     l1pualgo_->runNeutralsPU(l1region, z0, -1., puGlobals);
+    l1region.outputCrop(sortOutputs_);
   }
+
+  // save PF into the event
+  iEvent.put(l1regions_.fetch(false), "PF");
+
   // and save puppi
   iEvent.put(l1regions_.fetch(true), "Puppi");
 
