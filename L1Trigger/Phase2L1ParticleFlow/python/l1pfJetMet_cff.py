@@ -14,7 +14,7 @@ ak4PFL1Calo    = _ak4PFJets.clone(src = 'l1pfCandidates:Calo')
 ak4PFL1PF      = _ak4PFJets.clone(src = 'l1pfCandidates:PF')
 ak4PFL1Puppi   = _ak4PFJets.clone(src = 'l1pfCandidates:Puppi')
 
-from L1Trigger.Phase2L1Jets.L1SeedConePFJetProducer_cfi import L1SeedConePFJetProducer
+from L1Trigger.Phase2L1ParticleFlow.L1SeedConePFJetProducer_cfi import L1SeedConePFJetProducer
 scPFL1PF    = L1SeedConePFJetProducer.clone(L1PFObjects = 'l1pfCandidates:PF')
 scPFL1Puppi = L1SeedConePFJetProducer.clone(L1PFObjects = 'l1pfCandidates:Puppi')
 
