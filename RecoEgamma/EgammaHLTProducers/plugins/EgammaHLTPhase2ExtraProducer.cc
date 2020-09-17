@@ -14,6 +14,9 @@
 #include "DataFormats/L1TrackTrigger/interface/TTTrackExtra.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
+#include "DataFormats/HGCRecHit/interface/HGCRecHit.h"
+#include "DataFormats/HGCRecHit/interface/HGCRecHitCollections.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticle.h"
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingParticleFwd.h"
@@ -46,12 +49,24 @@ private:
   template<typename CollType,typename RefType>
   std::unique_ptr<CollType> filterObjs(const reco::EgTrigSumObjCollection& egTrigObjs,const edm::Handle<CollType>& objs,std::vector<RefType>& orgRefs,float maxDR2=0.4*0.4)const;
 
+  //these three filter functions are overly similar but with annoying differences
+  //eg rechits needs to access geometry, trk dr is also w.r.t the track eta/phi
+  //still could collapse into a single function
+  template<typename RecHitCollection>
+  std::unique_ptr<RecHitCollection> 
+  filterRecHits(const reco::EgTrigSumObjCollection& egTrigObjs,
+		const edm::Handle<RecHitCollection>& recHits,
+		const CaloGeometry& geom,float maxDR2=0.4*0.4)const;
+
   struct Tokens {
     edm::EDGetTokenT<reco::EgTrigSumObjCollection> egTrigObjs;
     edm::EDGetTokenT<L1TrackCollection> l1Trks;
     edm::EDGetTokenT<TrackingParticleCollection> trkParts;
     edm::EDGetTokenT<TTTrackAssociationMap<Ref_Phase2TrackerDigi_> > l1TrkToTrkPartMap;
-
+    edm::EDGetTokenT<reco::CaloClusterCollection> hgcalLayerClusters;
+    edm::EDGetTokenT<edm::ValueMap<std::pair<float,float> > > hgcalLayerClustersTime;
+    std::vector<std::pair<edm::EDGetTokenT<HGCRecHitCollection>,std::string> > hgcal;
+    
     template<typename T>
     static void setToken(edm::EDGetTokenT<T>& token,edm::ConsumesCollector& cc,const edm::ParameterSet& pset,const std::string& tagname){
       token = cc.consumes<T>(pset.getParameter<edm::InputTag>(tagname));
@@ -76,7 +91,14 @@ private:
     Tokens(const edm::ParameterSet& pset,edm::ConsumesCollector&& cc);
     
   };
-
+  template<typename T,typename H> 
+  static std::unique_ptr<edm::ValueMap<T> > makeValueMap(const H& handle,const std::vector<T>& values){
+    auto valueMap = std::make_unique<edm::ValueMap<T> >();
+    typename edm::ValueMap<T>::Filler filler(*valueMap);
+    filler.insert(handle,values.begin(),values.end());
+    filler.fill();
+    return valueMap;
+  }
 
   const Tokens tokens_;
 
@@ -92,6 +114,10 @@ EgammaHLTPhase2ExtraProducer::Tokens::Tokens(const edm::ParameterSet& pset,edm::
   setToken(l1Trks,cc,pset,"l1Trks");
   setToken(trkParts,cc,pset,"trkParts");
   setToken(l1TrkToTrkPartMap,cc,pset,"l1TrkToTrkPartMap");
+  setToken(hgcalLayerClusters,cc,pset,"hgcalLayerClusters");
+  setToken(hgcalLayerClustersTime,cc,pset,"hgcalLayerClustersTime");
+  setToken(hgcal,cc,pset,"hgcal");
+
 }
 
 
@@ -104,6 +130,11 @@ EgammaHLTPhase2ExtraProducer::EgammaHLTPhase2ExtraProducer(const edm::ParameterS
   produces<L1TrackCollection>();
   produces<L1TrackExtraCollection>();
   produces<TrackingParticleCollection>();
+  produces<reco::CaloClusterCollection>("hgcalLayerClusters");
+  produces<edm::ValueMap<std::pair<float,float> > >("hgcalLayerClustersTime");
+  for(auto& tokenLabel : tokens_.hgcal){
+    produces<HGCRecHitCollection>(tokenLabel.second);
+  }
 }
 
 void EgammaHLTPhase2ExtraProducer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
@@ -112,9 +143,22 @@ void EgammaHLTPhase2ExtraProducer::fillDescriptions(edm::ConfigurationDescriptio
   desc.add<edm::InputTag>("l1Trks", edm::InputTag("TTTracksFromTrackletEmulation","Level1TTTracks"));
   desc.add<edm::InputTag>("trkParts", edm::InputTag("mix","MergedTrackTruth"));  
   desc.add<edm::InputTag>("l1TrkToTrkPartMap", edm::InputTag("TTTrackAssociatorFromPixelDigis","Level1TTTracks"));  
+  desc.add<edm::InputTag>("hgcalLayerClusters", edm::InputTag("hgcalLayerClusters"));
+  desc.add<edm::InputTag>("hgcalLayerClustersTime", edm::InputTag("hgcalLayerClusters","timeLayerCluster"));
   desc.add<double>("minPtToSaveHits",0.);
   desc.add<bool>("saveHitsPlusPi",true);
-  desc.add<bool>("saveHitsPlusHalfPi",true);
+  desc.add<bool>("saveHitsPlusHalfPi",true); std::vector<edm::ParameterSet> ecalDefaults(2);  
+  edm::ParameterSetDescription tokenLabelDesc;
+  tokenLabelDesc.add<edm::InputTag>("src",edm::InputTag(""));
+  tokenLabelDesc.add<std::string>("label","");
+  std::vector<edm::ParameterSet> hgcalDefaults(3);
+  hgcalDefaults[0].addParameter("src",edm::InputTag("HGCalRecHit","HGCEERecHits"));
+  hgcalDefaults[0].addParameter("label",std::string("HGCEERecHits"));
+  hgcalDefaults[1].addParameter("src",edm::InputTag("HGCalRecHit","HGCHEFRecHits"));
+  hgcalDefaults[1].addParameter("label",std::string("HGCHEFRecHits"));
+  hgcalDefaults[2].addParameter("src",edm::InputTag("HGCalRecHit","HGCHEBRecHits"));
+  hgcalDefaults[2].addParameter("label",std::string("HGCHEBRecHits"));
+  desc.addVPSet("hgcal",tokenLabelDesc,hgcalDefaults);
   descriptions.add(("hltEgammaHLTPhase2ExtraProducer"), desc);
 }
 
@@ -127,6 +171,27 @@ void EgammaHLTPhase2ExtraProducer::produce(edm::StreamID streamID,
   auto l1trks = event.getHandle(tokens_.l1Trks);
   auto l1TrkToTrkPartMap = event.getHandle(tokens_.l1TrkToTrkPartMap);
   
+  edm::ESHandle<CaloGeometry> caloGeomHandle;
+  eventSetup.get<CaloGeometryRecord>().get(caloGeomHandle);
+  for(const auto& tokenLabel : tokens_.hgcal){
+    auto handle = event.getHandle(tokenLabel.first);
+    auto recHits = filterRecHits(*egTrigObjs,handle,*caloGeomHandle);
+    event.put(std::move(recHits),tokenLabel.second);
+  }
+
+  auto hgcalLayerClusters = event.getHandle(tokens_.hgcalLayerClusters);
+  auto hgcalLayerClustersTime = event.getHandle(tokens_.hgcalLayerClustersTime);
+  std::vector<edm::Ref<reco::CaloClusterCollection> > orgHGCalLayerClusterRefs;
+  auto hgcalLayerClustersFiltered = filterObjs(*egTrigObjs,hgcalLayerClusters,orgHGCalLayerClusterRefs);
+  std::vector<std::pair<float, float>> timesFiltered;
+  for(auto& clusRef : orgHGCalLayerClusterRefs){
+    timesFiltered.push_back((*hgcalLayerClustersTime)[clusRef]);
+  }
+  auto hgcalLayerClustersFilteredHandle = event.put(std::move(hgcalLayerClustersFiltered),"hgcalLayerClusters");
+  event.put(makeValueMap(hgcalLayerClustersFilteredHandle,timesFiltered),"hgcalLayerClustersTime");
+
+
+
   std::vector<edm::Ref<L1TrackCollection> > orgL1TrkRefs;
   auto l1TrksFiltered = filterObjs(*egTrigObjs,l1trks,orgL1TrkRefs);
   std::vector<edm::Ref<TrackingParticleCollection> > orgTPRefs;
@@ -211,6 +276,41 @@ std::unique_ptr<CollType> EgammaHLTPhase2ExtraProducer::filterObjs(const reco::E
     }
   }
   return filteredObjs;
+}
+
+template<typename RecHitCollection>
+std::unique_ptr<RecHitCollection> EgammaHLTPhase2ExtraProducer::filterRecHits(const reco::EgTrigSumObjCollection& egTrigObjs,const edm::Handle<RecHitCollection>& recHits,const CaloGeometry& geom,float maxDR2)const
+{
+  auto filteredHits = std::make_unique<RecHitCollection>();
+  if(!recHits.isValid()) return filteredHits;
+
+  std::vector<std::pair<float,float> > etaPhis;
+  for(const auto& egTrigObj : egTrigObjs){
+    if(egTrigObj.pt()>=minPtToSaveHits_){
+      etaPhis.push_back({egTrigObj.eta(),egTrigObj.phi()});
+      if(saveHitsPlusPi_) etaPhis.push_back({egTrigObj.eta(),egTrigObj.phi()+3.14159});
+      if(saveHitsPlusHalfPi_) etaPhis.push_back({egTrigObj.eta(),egTrigObj.phi()+3.14159/2.});
+    }
+  }
+  auto deltaR2Match = [&etaPhis,&maxDR2](const GlobalPoint& pos){
+    float eta = pos.eta();
+    float phi = pos.phi();
+    for(auto& etaPhi : etaPhis){ 
+      if(reco::deltaR2(eta,phi,etaPhi.first,etaPhi.second)<maxDR2) return true;
+    }
+    return false;
+  };
+
+  for(auto& hit : *recHits){
+    const CaloSubdetectorGeometry* subDetGeom =  geom.getSubdetectorGeometry(hit.id());
+    if(subDetGeom){
+      auto cellGeom = subDetGeom->getGeometry(hit.id());
+      if(deltaR2Match(cellGeom->getPosition())) filteredHits->push_back(hit);
+    }else{
+      throw cms::Exception("GeomError") << "could not get geometry for det id "<<hit.id().rawId();
+    }
+  }
+  return filteredHits;
 }
 
 
