@@ -18,7 +18,7 @@ l1PhaseIITree = cms.EDAnalyzer("L1PhaseIITreeStep1Producer",
 #   l1pfPhase1L1TJetToken  = cms.InputTag("Phase1L1TJetCalibrator" ,   "Phase1L1TJetFromPfCandidates"), # not there yet either
 
 
-   caloTauToken = cms.InputTag("L1CaloJetProducer","L1CaloTauCollectionBXV"),
+   caloTauToken = cms.InputTag("L1CaloJetProducer","CaloTaus"),
 
    l1PFMet = cms.InputTag("l1PFMetPuppi"),
 

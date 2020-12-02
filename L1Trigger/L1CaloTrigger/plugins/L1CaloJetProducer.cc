@@ -359,11 +359,11 @@ L1CaloJetProducer::L1CaloJetProducer(const edm::ParameterSet& iConfig) :
 
 {
     if (debug) printf("L1CaloJetProducer setup\n");
-    produces<l1tp2::CaloJetsCollection>("L1CaloJetsNoCuts");
+    produces<l1tp2::CaloJetsCollection>("CaloJetsNoCuts");
     //produces<l1tp2::CaloJetsCollection>("L1CaloJetsWithCuts");
     //produces<l1extra::L1JetParticleCollection>("L1CaloClusterCollectionWithCuts");
-    produces< BXVector<l1t::Jet> >("L1CaloJetCollectionBXV");
-    produces< BXVector<l1t::Tau> >("L1CaloTauCollectionBXV");
+    produces< BXVector<l1t::Jet> >("CaloJets");
+    produces< BXVector<l1t::Tau> >("CaloTaus");
 
 
     if(debug) printf("\nHcalTpEtMin = %f\nEcalTpEtMin = %f\n", HcalTpEtMin, EcalTpEtMin);
@@ -1179,11 +1179,11 @@ void L1CaloJetProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     } // end jetClusters loop
 
 
-    iEvent.put(std::move(L1CaloJetsNoCuts),"L1CaloJetsNoCuts");
+    iEvent.put(std::move(L1CaloJetsNoCuts),"CaloJetsNoCuts");
     //iEvent.put(std::move(L1CaloJetsWithCuts), "L1CaloJetsWithCuts" );
     //iEvent.put(std::move(L1CaloClusterCollectionWithCuts), "L1CaloClusterCollectionWithCuts" );
-    iEvent.put(std::move(L1CaloJetCollectionBXV),"L1CaloJetCollectionBXV");
-    iEvent.put(std::move(L1CaloTauCollectionBXV),"L1CaloTauCollectionBXV");
+    iEvent.put(std::move(L1CaloJetCollectionBXV),"CaloJets");
+    iEvent.put(std::move(L1CaloTauCollectionBXV),"CaloTaus");
 
     //printf("end L1CaloJetProducer\n");
 }
