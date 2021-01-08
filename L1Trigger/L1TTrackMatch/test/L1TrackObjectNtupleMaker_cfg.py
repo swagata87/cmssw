@@ -37,7 +37,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 # input and output
 ############################################################
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(50))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 
 readFiles = cms.untracked.vstring(
     "/store/relval/CMSSW_11_1_0_pre2/RelValTTbar_14TeV/GEN-SIM-DIGI-RAW/PU25ns_110X_mcRun4_realistic_v2_2026D49PU200-v1/20000/F7BF4AED-51F1-9D47-B86D-6C3DDA134AB9.root"
@@ -135,7 +135,7 @@ process.L1TrackNtuple = cms.EDAnalyzer('L1TrackObjectNtupleMaker',
         TP_minNStubLayer = cms.int32(4),  # require TP to have stubs in >= X layers/disks
         TP_minPt = cms.double(2.0),       # only save TPs with pt > X GeV
         TP_maxEta = cms.double(2.5),      # only save TPs with |eta| < X
-        TP_maxZ0 = cms.double(30.0),      # only save TPs with |z0| < X cm
+        TP_maxZ0 = cms.double(15.0),      # only save TPs with |z0| < X cm
         L1TrackInputTag = cms.InputTag("TTTracksFromTrackletEmulation", "Level1TTTracks"), # TTTracks, prompt
         L1TrackExtendedInputTag = cms.InputTag("TTTracksFromExtendedTrackletEmulation", "Level1TTTracks"), # TTTracks, extended
         MCTruthTrackInputTag = cms.InputTag("TTTrackAssociatorFromPixelDigis", "Level1TTTracks"),  # MCTruth track, prompt
