@@ -127,7 +127,7 @@ void L1Analysis::L1AnalysisPhaseII::SetMuonKF(const edm::Handle<l1t::RegionalMuo
       if (it->hwPt() > 0) {
         //      std::cout<<"hwPt vs hwPt2?"<<it->hwPt()*0.5<<" "<<it->hwPt2()<<"   "<<it->hwSign()<<"   "<<muonDetector<<std::endl;
         l1extra_.standaloneMuonPt.push_back(it->hwPt() * 0.5);
-        l1extra_.standaloneMuonPt2.push_back(it->hwPt2());
+        l1extra_.standaloneMuonPt2.push_back(it->hwPtUnconstrained());
         l1extra_.standaloneMuonDXY.push_back(it->hwDXY());
         l1extra_.standaloneMuonEta.push_back(it->hwEta() * 0.010875);
         l1extra_.standaloneMuonPhi.push_back(
