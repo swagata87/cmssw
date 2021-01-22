@@ -195,10 +195,7 @@ private:
   // std::vector<float>* m_pv_L1recotruesumpt;
   // std::vector<float>* m_pv_L1recosumpt;
   std::vector<float>* m_pv_L1reco;
-<<<<<<< HEAD:L1Trigger/TrackFindingTracklet/test/L1TrackObjectNtupleMaker.cc
-=======
   std::vector<float>* m_pv_L1reco_sum;
->>>>>>> Adding test directory to include simulation performance scripts:L1Trigger/L1TTrackMatch/test/L1TrackObjectNtupleMaker.cc
   // std::vector<float>* m_pv_L1TP;
   // std::vector<float>* m_pv_L1TPsumpt;
   std::vector<float>* m_pv_MC;
@@ -1179,6 +1176,7 @@ void L1TrackObjectNtupleMaker::analyze(const edm::Event& iEvent, const edm::Even
     //Vertex
     edm::Handle< l1t::TkPrimaryVertexCollection >L1TkPrimaryVertexHandle;
     iEvent.getByToken(L1VertexToken_, L1TkPrimaryVertexHandle);
+    std::vector< l1t::TkPrimaryVertex >::const_iterator vtxIter;
 
     // Track jets
     edm::Handle< std::vector<l1t::TkJet> > TrackFastJetsHandle;
