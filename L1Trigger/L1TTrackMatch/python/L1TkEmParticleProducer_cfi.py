@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
-L1TkPhotons = cms.EDProducer("TkEmProducer",
-        label = cms.string("EG"), 	# labels the collection of TkEmProducer that is produced
+L1TkPhotons = cms.EDProducer("TkEmParticleProducer",
+        label = cms.string("EG"), 	# labels the collection TkEmCollection that is produced
 					# (not really needed actually)
         L1EGammaInputTag = cms.InputTag("simCaloStage2Digis",""),
                                                 # When the standard sequences are used :

@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 L1TkElectrons = cms.EDProducer("L1TkElectronTrackProducer",
-	  label = cms.string("EG"),	# labels the collection of TkEmProducer that is produced.
+	  label = cms.string("EG"),	# labels the collection TkElectronCollection that is produced.
 		# (not really needed actually)
     L1EGammaInputTag = cms.InputTag("simCaloStage2Digis",""),
     # Only the L1EG objects that have ET > ETmin in GeV
