@@ -31,6 +31,8 @@ namespace reco {
     float eta() const { return eta_; }
     float phi() const { return phi_; }
 
+    void setEnergyPtEtaPhi(float energy,float pt,float eta,float phi);
+
     const reco::SuperClusterRef& superCluster() const { return superCluster_; }
     const reco::GsfTrackRefVector& gsfTracks() const { return gsfTracks_; }
     const reco::ElectronSeedRefVector& seeds() const { return seeds_; }
