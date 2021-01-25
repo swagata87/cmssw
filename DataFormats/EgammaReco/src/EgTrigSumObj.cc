@@ -16,6 +16,14 @@ reco::EgTrigSumObj::EgTrigSumObj(const reco::RecoEcalCandidate& ecalCand)
       hasPixelMatch_(false),
       superCluster_(ecalCand.superCluster()) {}
 
+void reco::EgTrigSumObj::setEnergyPtEtaPhi(float energy,float pt,float eta,float phi)
+{
+  energy_ = energy;
+  pt_ = pt;
+  eta_ = eta;
+  phi_ = phi;
+}
+
 void reco::EgTrigSumObj::setSeeds(const reco::ElectronSeedRefVector&& seeds) {
   seeds_ = seeds;
   hasPixelMatch_ = false;
