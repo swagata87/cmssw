@@ -33,7 +33,7 @@ L1TTkEmFilter::L1TTkEmFilter(const edm::ParameterSet& iConfig)
       l1TkEmTag2_(iConfig.getParameter<edm::InputTag>("inputTag2")),
       tkEmToken1_(consumes<TkEmCollection>(l1TkEmTag1_)),
       tkEmToken2_(consumes<TkEmCollection>(l1TkEmTag2_)) {
-  min_Pt_ = iConfig.getParameter<double>("MinPt");
+  min_Pt_ = iConfig.getParameter<std::vector<double> >("MinPt");
   min_N_ = iConfig.getParameter<int>("MinN");
   min_Eta_ = iConfig.getParameter<double>("MinEta");
   max_Eta_ = iConfig.getParameter<double>("MaxEta");
@@ -53,6 +53,23 @@ L1TTkEmFilter::L1TTkEmFilter(const edm::ParameterSet& iConfig)
   if (etaBinsForIsolation_.size() != (trkIsolation_.size() + 1))
     throw cms::Exception("ConfigurationError")
         << "Vector of isolation values should have same size of vector of eta bins plus one.";
+
+
+  if (min_N_ != int(min_Pt_.size()) ) {
+  throw cms::Exception("ConfigurationError")
+    << "Vector of MinPt should have same size of MinN.";
+ }
+
+if (min_N_>1) {
+  for ( int bin = 1; bin != min_N_; ++bin) {
+    if ( min_Pt_.at(bin) > min_Pt_.at(bin-1)  ) {
+      throw cms::Exception("ConfigurationError")
+	<< "MinPt vector should be ordered as decreasing pT. Example, for DoubleEG_30_20, write (30, 20)";
+    }
+  }
+ }
+
+
 }
 
 L1TTkEmFilter::~L1TTkEmFilter() = default;
@@ -64,7 +81,7 @@ L1TTkEmFilter::~L1TTkEmFilter() = default;
 void L1TTkEmFilter::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   makeHLTFilterDescription(desc);
-  desc.add<double>("MinPt", -1.0);
+  desc.add<std::vector<double>>("MinPt", {-1.0});
   desc.add<double>("MinEta", -5.0);
   desc.add<double>("MaxEta", 5.0);
   desc.add<int>("MinN", 1);
@@ -121,7 +138,9 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
   Handle<l1t::TkEmCollection> tkEms2;
   iEvent.getByToken(tkEmToken2_, tkEms2);
 
-  int ntrkEm(0);
+  //  int ntrkEm(0);
+  int ntrkEm[min_N_] = { }; 
+  
   // Loop over first collection
   auto atrkEms(tkEms1->begin());
   auto otrkEms(tkEms1->end());
@@ -132,7 +151,7 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
     bool passIsolation(false);
 
     if (applyQual1_) {
-      if (qual1IsMask_)
+      if (qual1IsMask_) 
         passQuality = (itkEm->EGRef()->hwQual() & quality1_);
       else
         passQuality = (itkEm->EGRef()->hwQual() == quality1_);
@@ -146,11 +165,13 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
           itkEm->trkIsol() < trkIsolation_.at(etabin - 1))
         passIsolation = true;
     }
-
-    if (offlinePt >= min_Pt_ && itkEm->eta() <= max_Eta_ && itkEm->eta() >= min_Eta_ && passQuality && passIsolation) {
-      ntrkEm++;
-      l1t::TkEmRef ref1(l1t::TkEmRef(tkEms1, distance(atrkEms, itkEm)));
-      filterproduct.addObject(trigger::TriggerObjectType::TriggerL1TkEm, ref1);
+    
+    for ( int ibin = 0; ibin < (min_N_) ; ibin++) {
+      if (offlinePt >= min_Pt_.at(ibin) && itkEm->eta() <= max_Eta_ && itkEm->eta() >= min_Eta_ && passQuality && passIsolation) {
+	ntrkEm[ibin]++;
+	l1t::TkEmRef ref1(l1t::TkEmRef(tkEms1, distance(atrkEms, itkEm)));
+	filterproduct.addObject(trigger::TriggerObjectType::TriggerL1TkEm, ref1);
+      }
     }
   }
 
@@ -177,15 +198,29 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
         passIsolation = true;
     }
 
-    if (offlinePt >= min_Pt_ && itkEm->eta() <= max_Eta_ && itkEm->eta() >= min_Eta_ && passQuality && passIsolation) {
-      ntrkEm++;
-      l1t::TkEmRef ref2(l1t::TkEmRef(tkEms2, distance(atrkEms, itkEm)));
-      filterproduct.addObject(trigger::TriggerObjectType::TriggerL1TkEm, ref2);
+    for ( int ibin = 0; ibin<min_N_ ; ibin++) {
+      if (offlinePt >= min_Pt_.at(ibin) && itkEm->eta() <= max_Eta_ && itkEm->eta() >= min_Eta_ && passQuality && passIsolation) {
+	ntrkEm[ibin]++;
+	l1t::TkEmRef ref2(l1t::TkEmRef(tkEms2, distance(atrkEms, itkEm)));
+	filterproduct.addObject(trigger::TriggerObjectType::TriggerL1TkEm, ref2);
+      }
     }
   }
 
   // return with final filter decision
-  const bool accept(ntrkEm >= min_N_);
+  bool iaccept[min_N_]={false};
+  //Example: For DoubleEG_30_20, number of EG with pT>30 should be >=1,
+  // and number of EG with pT>20 should be >=2 
+  for ( int ix = 1; ix<=(min_N_) ; ix++) {
+    if (ntrkEm[min_N_ - ix]  >= min_N_-(ix-1) ) {
+      iaccept[ix-1]=true;
+    }
+  }
+
+  bool accept=true;
+  for ( int ix = 0; ix < min_N_ ; ix++) {
+    accept = accept && iaccept[ix];
+  }
   return accept;
 }
 

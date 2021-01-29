@@ -38,7 +38,7 @@ private:
   edm::EDGetTokenT<TkEmCollection> tkEmToken1_;  // token identifying product containing L1 TkEms
   edm::EDGetTokenT<TkEmCollection> tkEmToken2_;  // token identifying product containing L1 TkEms
 
-  double min_Pt_;                            // min pt cut
+  std::vector<double> min_Pt_;                            // min pt cut
   int min_N_;                                // min number of candidates above pT cut
   double min_Eta_;                           //min eta cut
   double max_Eta_;                           //max eta cut
