@@ -66,14 +66,7 @@ void TICLSeedingRegionProducer::fillDescriptions(edm::ConfigurationDescriptions&
                         "hitPattern().numberOfLostHits(\"MISSING_OUTER_HITS\") < 5");
   desc.add<std::string>("propagator", "PropagatorWithMaterial");
   desc.add<int>("algoId", 1);
-  // following are needed for seeding TICL with L1 egamma objects (TkEm) //
-  desc.add<edm::InputTag>("l1tkems", edm::InputTag("L1TkPhotonsHGC","EG"));
-  desc.add<double>("minpt", 10); 
-  desc.add<double>("minabseta", 1.479);
-  desc.add<double>("maxabseta", 4.0);
-  desc.add<std::vector<double>>("endcapScalings", {3.17445,1.13219,0.0});
-  desc.add<int>("quality", 5);
- 
+  desc.add<edm::ParameterSetDescription>("seedTiclByL1Config", SeedingRegionByL1::makePSetDescription());
   descriptions.add("ticlSeedingRegionProducer", desc);
 }
 
