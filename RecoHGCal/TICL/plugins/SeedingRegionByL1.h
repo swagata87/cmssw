@@ -25,12 +25,14 @@ namespace ticl {
 
     void initialize(const edm::EventSetup& es) override{};
     void makeRegions(const edm::Event& ev, const edm::EventSetup& es, std::vector<TICLSeedingRegion>& result) override;
+    static void fillPSetDescription(edm::ParameterSetDescription& desc);
+    static edm::ParameterSetDescription makePSetDescription();
 
   private:
-    edm::EDGetTokenT<std::vector<l1t::TkEm>> l1tkems_token_;
-    double minpt_; // minimum pT of L1 TkEm objects
-    double minabseta_; // minimum |eta| of L1 TkEm objects
-    double maxabseta_; // maximum |eta| of L1 TkEm objects 
+    edm::EDGetTokenT<std::vector<l1t::TkEm>> l1TkEmsToken_;
+    double minPt_; // minimum pT of L1 TkEm objects
+    double minAbsEta_; // minimum |eta| of L1 TkEm objects
+    double maxAbsEta_; // maximum |eta| of L1 TkEm objects 
     std::vector<double> endcapScalings_; // pT scaling factors for endcap
     int quality_; // hwQual 
 
