@@ -10,39 +10,33 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "SeedingRegionByL1.h"
 
-using namespace ticl;
-
-SeedingRegionByL1::SeedingRegionByL1(const edm::ParameterSet &conf, edm::ConsumesCollector &sumes)
+ticl::SeedingRegionByL1::SeedingRegionByL1(const edm::ParameterSet &conf, edm::ConsumesCollector &sumes)
     : SeedingRegionAlgoBase(conf, sumes),
-      l1tkems_token_(sumes.consumes<std::vector<l1t::TkEm>>(conf.getParameter<edm::InputTag>("l1tkems"))),
-      minpt_(conf.getParameter<double>("minpt")),
-      minabseta_(conf.getParameter<double>("minabseta")),
-      maxabseta_(conf.getParameter<double>("maxabseta")),
+      l1TkEmsToken_(sumes.consumes<std::vector<l1t::TkEm>>(conf.getParameter<edm::InputTag>("l1TkEms"))),
+      minPt_(conf.getParameter<double>("minPt")),
+      minAbsEta_(conf.getParameter<double>("minAbsEta")),
+      maxAbsEta_(conf.getParameter<double>("maxAbsEta")),
       endcapScalings_(conf.getParameter<std::vector<double> >("endcapScalings")),
       quality_(conf.getParameter<int>("quality")) {}
 
-SeedingRegionByL1::~SeedingRegionByL1() {}
+ticl::SeedingRegionByL1::~SeedingRegionByL1() {}
 
-void SeedingRegionByL1::makeRegions(const edm::Event &ev,
+void ticl::SeedingRegionByL1::makeRegions(const edm::Event &ev,
                                         const edm::EventSetup &es,
                                         std::vector<TICLSeedingRegion> &result) {
 
-  edm::Handle<std::vector<l1t::TkEm>> l1tkems_h;
-  ev.getByToken(l1tkems_token_, l1tkems_h);
-  edm::ProductID l1tkemsId = l1tkems_h.id();
+  auto l1TrkEms = ev.getHandle(l1TkEmsToken_);
+  edm::ProductID l1tkemsId = l1TrkEms.id();
 
-  auto atrkEms(l1tkems_h->begin());
-  auto otrkEms(l1tkems_h->end());
-  std::vector<l1t::TkEm>::const_iterator itkEm;
-  int indx=0;
-  for (itkEm = atrkEms; itkEm != otrkEms; itkEm++) {
-    double offlinePt = this->TkEmOfflineEt(itkEm->pt(), itkEm->eta());
-    if ( (offlinePt<minpt_) || (std::abs(itkEm->eta())<minabseta_) || (std::abs(itkEm->eta())>maxabseta_) || (itkEm->EGRef()->hwQual() != quality_) ) {
+  for(size_t indx=0;indx<(*l1TrkEms).size();indx++){
+    const auto& l1TrkEm = (*l1TrkEms)[indx];
+    double offlinePt = this->TkEmOfflineEt(l1TrkEm.pt(), l1TrkEm.eta());
+    if ( (offlinePt<minPt_) || (std::abs(l1TrkEm.eta())<minAbsEta_) || (std::abs(l1TrkEm.eta())>maxAbsEta_) || (l1TrkEm.EGRef()->hwQual() != quality_) ) {
       continue;
     }
 
-    int iSide = int(itkEm->eta() > 0);
-    result.emplace_back( GlobalPoint(itkEm->p4().X(),itkEm->p4().Y(),itkEm->p4().Z()), GlobalVector(itkEm->px(),itkEm->py(),itkEm->pz()) , iSide, indx, l1tkemsId ) ;
+    int iSide = int(l1TrkEm.eta() > 0);
+    result.emplace_back(GlobalPoint(l1TrkEm.p4().X(),l1TrkEm.p4().Y(),l1TrkEm.p4().Z()), GlobalVector(l1TrkEm.px(),l1TrkEm.py(),l1TrkEm.pz()), iSide, indx, l1tkemsId );
     indx++;
   }
   
@@ -52,6 +46,22 @@ void SeedingRegionByL1::makeRegions(const edm::Event &ev,
   
 }
 
-double SeedingRegionByL1::TkEmOfflineEt(double Et, double Eta) const {
+double ticl::SeedingRegionByL1::TkEmOfflineEt(double Et, double Eta) const {
     return (endcapScalings_.at(0) + Et * endcapScalings_.at(1) + Et * Et * endcapScalings_.at(2));
+}
+
+void ticl::SeedingRegionByL1::fillPSetDescription(edm::ParameterSetDescription& desc)
+{
+  desc.add<edm::InputTag>("l1tkems", edm::InputTag("L1TkPhotonsHGC","EG"));
+  desc.add<double>("minpt", 10); 
+  desc.add<double>("minabseta", 1.479);
+  desc.add<double>("maxabseta", 4.0);
+  desc.add<std::vector<double>>("endcapScalings", {3.17445,1.13219,0.0});
+  desc.add<int>("quality", 5);
+}
+
+edm::ParameterSetDescription ticl::SeedingRegionByL1::makePSetDescription(){
+  edm::ParameterSetDescription desc;
+  fillPSetDescription(desc);
+  return desc;
 }
