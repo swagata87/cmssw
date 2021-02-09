@@ -49,7 +49,7 @@ TICLSeedingRegionProducer::TICLSeedingRegionProducer(const edm::ParameterSet& ps
       myAlgo_ = std::make_unique<SeedingRegionGlobal>(ps, sumes);
       break;
     case 3:
-      myAlgo_ = std::make_unique<SeedingRegionByL1>(ps, sumes); // needed for HLT
+      myAlgo_ = std::make_unique<SeedingRegionByL1>(ps.getParameterSet("seedTiclByL1Config"), sumes); // needed for HLT
       break;
     default:
       break;
