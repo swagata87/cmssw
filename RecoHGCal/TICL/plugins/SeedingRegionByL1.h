@@ -30,6 +30,7 @@ namespace ticl {
 
   private:
     edm::EDGetTokenT<std::vector<l1t::TkEm>> l1TkEmsToken_;
+    int algo_verbosity_=0;
     double minPt_; // minimum pT of L1 TkEm objects
     double minAbsEta_; // minimum |eta| of L1 TkEm objects
     double maxAbsEta_; // maximum |eta| of L1 TkEm objects 
