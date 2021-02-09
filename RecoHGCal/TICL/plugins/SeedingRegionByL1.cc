@@ -13,6 +13,7 @@
 ticl::SeedingRegionByL1::SeedingRegionByL1(const edm::ParameterSet &conf, edm::ConsumesCollector &sumes)
     : SeedingRegionAlgoBase(conf, sumes),
       l1TkEmsToken_(sumes.consumes<std::vector<l1t::TkEm>>(conf.getParameter<edm::InputTag>("l1TkEmColl"))),
+      algo_verbosity_(conf.getParameter<int>("algo_verbosity")),
       minPt_(conf.getParameter<double>("minPt")),
       minAbsEta_(conf.getParameter<double>("minAbsEta")),
       maxAbsEta_(conf.getParameter<double>("maxAbsEta")),
@@ -53,6 +54,7 @@ double ticl::SeedingRegionByL1::TkEmOfflineEt(double Et, double Eta) const {
 void ticl::SeedingRegionByL1::fillPSetDescription(edm::ParameterSetDescription& desc)
 {
   desc.add<edm::InputTag>("l1TkEmColl", edm::InputTag("L1TkPhotonsHGC","EG"));
+  desc.add<int>("algo_verbosity", 0);
   desc.add<double>("minPt", 10); 
   desc.add<double>("minAbsEta", 1.479);
   desc.add<double>("maxAbsEta", 4.0);
