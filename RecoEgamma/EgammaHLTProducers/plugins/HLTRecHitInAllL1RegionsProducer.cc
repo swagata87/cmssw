@@ -234,7 +234,7 @@ void HLTRecHitInAllL1RegionsProducer<RecHitType>::produce(edm::Event& event, con
           for (const auto& region : regions) {
             if (region.inRegion(this_cell->etaPos(), this_cell->phiPos())) {
               filteredRecHits->push_back(recHit);
-              break;
+	      break;
             }
           }
         }
@@ -348,6 +348,34 @@ void L1RegionData<l1extra::L1EmParticleCollection>::getEtaPhiRegions(const edm::
     }
   }
 }
+
+// needed for phase-2 
+template <>
+void L1RegionData<BXVector<l1t::EGamma>>::getEtaPhiRegions(const edm::Event& event,
+							   std::vector<RectangularEtaPhiRegion>& regions,
+							   const L1CaloGeometry& l1CaloGeom) const {
+  edm::Handle<BXVector<l1t::EGamma>> l1Cands;
+  event.getByToken(token_, l1Cands);
+
+  for (const auto& l1Cand : *l1Cands) {
+    if (l1Cand.et() >= minEt_ && l1Cand.et() < maxEt_) {
+
+      // Is it possible to access low and high edges of eta/phi in phase-2?
+      double etaLow = l1Cand.eta();
+      double etaHigh = l1Cand.eta();
+      double phiLow = l1Cand.phi();
+      double phiHigh = l1Cand.phi();
+
+      etaLow -= regionEtaMargin_;
+      etaHigh += regionEtaMargin_;
+      phiLow -= regionPhiMargin_;
+      phiHigh += regionPhiMargin_;
+
+      regions.push_back(RectangularEtaPhiRegion(etaLow, etaHigh, phiLow, phiHigh));
+    }
+  }
+}
+
 
 typedef HLTRecHitInAllL1RegionsProducer<EcalRecHit> HLTEcalRecHitInAllL1RegionsProducer;
 DEFINE_FWK_MODULE(HLTEcalRecHitInAllL1RegionsProducer);
