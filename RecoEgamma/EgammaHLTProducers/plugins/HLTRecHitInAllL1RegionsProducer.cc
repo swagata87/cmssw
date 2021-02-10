@@ -358,7 +358,7 @@ void L1RegionData<BXVector<l1t::EGamma>>::getEtaPhiRegions(const edm::Event& eve
   event.getByToken(token_, l1Cands);
 
   for (const auto& l1Cand : *l1Cands) {
-    if (l1Cand.et() >= minEt_ && l1Cand.et() < maxEt_) {
+    if (l1Cand.et() >= minEt_ && l1Cand.et() < maxEt_ && (l1Cand.hwQual()&0x2)>0 ) {
 
       // Is it possible to access low and high edges of eta/phi in phase-2?
       double etaLow = l1Cand.eta();
@@ -366,10 +366,12 @@ void L1RegionData<BXVector<l1t::EGamma>>::getEtaPhiRegions(const edm::Event& eve
       double phiLow = l1Cand.phi();
       double phiHigh = l1Cand.phi();
 
-      etaLow -= regionEtaMargin_;
-      etaHigh += regionEtaMargin_;
+      etaLow  = std::max(-1.6, etaLow-regionEtaMargin_); // we don't want to go in HGCAL
+      etaHigh = std::min(1.6, etaHigh+regionEtaMargin_); // so restrict upto |eta|<1.6, which should be enough for ECAL barrel
       phiLow -= regionPhiMargin_;
       phiHigh += regionPhiMargin_;
+
+      std::cout << "etaLow " << etaLow << "  etaHigh " << etaHigh << "  phiLow " << phiLow << "  phiHigh " << phiHigh << std::endl;
 
       regions.push_back(RectangularEtaPhiRegion(etaLow, etaHigh, phiLow, phiHigh));
     }
