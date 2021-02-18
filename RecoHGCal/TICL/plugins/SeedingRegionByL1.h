@@ -1,3 +1,5 @@
+// Author: Swagata Mukherjee
+
 #ifndef RecoHGCal_TICL_SeedingRegionByL1_h
 #define RecoHGCal_TICL_SeedingRegionByL1_h
 #include <memory>
@@ -38,7 +40,7 @@ class SeedingRegionByL1 final : public SeedingRegionAlgoBase {
   std::vector<double> endcapScalings_;  // pT scaling factors for endcap
   int quality_;                         // hwQual
 
-  double TkEmOfflineEt(double Et, double Eta) const;
+  double TkEmOfflineEt(double Et) const;
 };
 }  // namespace ticl
 #endif
