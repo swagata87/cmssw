@@ -1,6 +1,11 @@
-/*  TICL is currently seeded by tracks, or just globally.
- *  Here, adding option to seed TICL by L1 e/gamma objects (L1 TkEm).
- *  This is important for HLT.
+/*
+   Author: Swagata Mukherjee
+
+   Date: Feb 2021
+
+   TICL is currently seeded by tracks, or just globally.
+   Here, adding option to seed TICL by L1 e/gamma objects (L1 TkEm).
+   This is expected to be useful for CPU timing at the HLT.
  */
 
 #include "SeedingRegionByL1.h"
@@ -33,7 +38,7 @@ void ticl::SeedingRegionByL1::makeRegions(
 
   for (size_t indx = 0; indx < (*l1TrkEms).size(); indx++) {
     const auto &l1TrkEm = (*l1TrkEms)[indx];
-    double offlinePt = this->TkEmOfflineEt(l1TrkEm.pt(), l1TrkEm.eta());
+    double offlinePt = this->TkEmOfflineEt(l1TrkEm.pt());
     if ((offlinePt < minPt_) || (std::abs(l1TrkEm.eta()) < minAbsEta_) ||
         (std::abs(l1TrkEm.eta()) > maxAbsEta_) ||
         (l1TrkEm.EGRef()->hwQual() != quality_)) {
@@ -54,7 +59,7 @@ void ticl::SeedingRegionByL1::makeRegions(
             });
 }
 
-double ticl::SeedingRegionByL1::TkEmOfflineEt(double Et, double Eta) const {
+double ticl::SeedingRegionByL1::TkEmOfflineEt(double Et) const {
   return (endcapScalings_.at(0) + Et * endcapScalings_.at(1) +
           Et * Et * endcapScalings_.at(2));
 }

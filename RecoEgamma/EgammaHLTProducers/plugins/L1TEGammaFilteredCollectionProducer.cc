@@ -1,3 +1,29 @@
+/*
+  Author: Swagata Mukherjee
+
+  Date: Feb 2021
+
+  At the time of writing this new module, it is intended to be used mainly for
+  phase-2 ECAL(barrel). Before feeding in the L1 e/g barrel collection to
+  HLTEcalRecHitInAllL1RegionsProducer, it can pass through this module which
+  will filter the collection based on hardware quality and pT.
+
+  The most generic L1 e/g phase-2 collections are:
+  TkEm, which is std::vector<l1t::TkEm>
+  &
+  StaEG, which is BXVector<l1t::EGamma>
+  Despite this technical difference, the objects are almost identical, for all
+  practical purposes. So any of these two collections could have been used.
+  Currently, BXVector<l1t::EGamma> is recognised by the next step
+  HLTEcalRecHitInAllL1RegionsProducer, while std::vector<l1t::TkEm> is not. So
+  using BXVector<l1t::EGamma> is straightforward. If for some reason one need to
+  use std::vector<l1t::TkEm>, changes in HLTEcalRecHitInAllL1RegionsProducer
+  would be necesary.
+
+  For HGCAL(endcap) the approach is different; there we will seed TICL with L1
+  e/g. So this module is not foreseen to be neccessaey for HGCAL.
+ */
+
 #include "DataFormats/L1TCorrelator/interface/TkEm.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
