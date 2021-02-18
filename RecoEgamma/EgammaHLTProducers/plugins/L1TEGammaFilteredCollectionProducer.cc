@@ -40,11 +40,13 @@ L1TEGammaFilteredCollectionProducer::L1TEGammaFilteredCollectionProducer(const e
   quality_ = iConfig.getParameter<int>("quality");
   qualIsMask_ = iConfig.getParameter<bool>("qualIsMask");
   applyQual_ = iConfig.getParameter<bool>("applyQual");
-  produces<BXVector<l1t::EGamma>>();
   minBX_ = iConfig.getParameter<int>("minBX");
   maxBX_ = iConfig.getParameter<int>("maxBX");
   minPt_ = iConfig.getParameter<double>("minPt");
   scalings_ = iConfig.getParameter<std::vector<double> >("scalings");
+
+  produces<BXVector<l1t::EGamma>>();
+
 }
 
 L1TEGammaFilteredCollectionProducer::~L1TEGammaFilteredCollectionProducer() = default;
