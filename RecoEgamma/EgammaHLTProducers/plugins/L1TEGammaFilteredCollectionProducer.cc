@@ -30,7 +30,7 @@ private:
   int minBX_;
   int maxBX_;
   double minPt_;
-  std::vector<double> scalings_; // pT scaling factors for endcap
+  std::vector<double> scalings_; // pT scaling factors
   double GetOfflineEt(double Et) const;
 };
 
