@@ -4,7 +4,7 @@
   Date: Feb 2021
 
   At the time of writing this new module, it is intended to be used mainly for
-  phase-2 ECAL(barrel). Before feeding in the L1 e/g barrel collection to
+  phase-2. Before feeding in the L1 e/g collection to
   HLTEcalRecHitInAllL1RegionsProducer, it can pass through this module which
   will filter the collection based on hardware quality and pT.
 
@@ -18,10 +18,8 @@
   HLTEcalRecHitInAllL1RegionsProducer, while std::vector<l1t::TkEm> is not. So
   using BXVector<l1t::EGamma> is straightforward. If for some reason one need to
   use std::vector<l1t::TkEm>, changes in HLTEcalRecHitInAllL1RegionsProducer
-  would be necesary.
+  would also be necesary.
 
-  For HGCAL(endcap) the approach is different; there we will seed TICL with L1
-  e/g. So this module is not foreseen to be neccessaey for HGCAL.
  */
 
 #include "DataFormats/L1TCorrelator/interface/TkEm.h"
