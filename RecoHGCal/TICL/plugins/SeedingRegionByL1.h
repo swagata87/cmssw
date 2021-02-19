@@ -23,7 +23,6 @@ class SeedingRegionByL1 final : public SeedingRegionAlgoBase {
  public:
   SeedingRegionByL1(const edm::ParameterSet& conf,
                     edm::ConsumesCollector& sumes);
-  ~SeedingRegionByL1() override;
 
   void initialize(const edm::EventSetup& es) override{};
   void makeRegions(const edm::Event& ev, const edm::EventSetup& es,
@@ -33,7 +32,7 @@ class SeedingRegionByL1 final : public SeedingRegionAlgoBase {
 
  private:
   edm::EDGetTokenT<std::vector<l1t::TkEm>> l1TkEmsToken_;
-  int algo_verbosity_ = 0;
+  int algoVerbosity_ = 0;
   double minPt_;                        // minimum pT of L1 TkEm objects
   double minAbsEta_;                    // minimum |eta| of L1 TkEm objects
   double maxAbsEta_;                    // maximum |eta| of L1 TkEm objects

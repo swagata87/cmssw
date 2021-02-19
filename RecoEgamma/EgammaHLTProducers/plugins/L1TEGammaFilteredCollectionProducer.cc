@@ -53,7 +53,7 @@ class L1TEGammaFilteredCollectionProducer : public edm::global::EDProducer<> {
   int maxBX_;
   double minPt_;
   std::vector<double> scalings_;  // pT scaling factors
-  double GetOfflineEt(double Et) const;
+  double getOfflineEt(double Et) const;
 };
 
 L1TEGammaFilteredCollectionProducer::L1TEGammaFilteredCollectionProducer(
@@ -102,7 +102,7 @@ void L1TEGammaFilteredCollectionProducer::produce(
     // Loop over all L1 e/gamma objects
     for (BXVector<l1t::EGamma>::const_iterator iEg = (*l1Egs).begin(bx);
          iEg != (*l1Egs).end(bx); iEg++) {
-      double offlineEt = this->GetOfflineEt((*iEg).pt());
+      double offlineEt = this->getOfflineEt((*iEg).pt());
       bool passQuality(false);
       if (applyQual_) {
         if (qualIsMask_)
@@ -121,8 +121,8 @@ void L1TEGammaFilteredCollectionProducer::produce(
   iEvent.put(std::move(outEgs));
 }
 
-double L1TEGammaFilteredCollectionProducer::GetOfflineEt(double Et) const {
-  return (scalings_.at(0) + Et * scalings_.at(1) + Et * Et * scalings_.at(2));
+double L1TEGammaFilteredCollectionProducer::getOfflineEt(double et) const {
+  return (scalings_.at(0) + et * scalings_.at(1) + et * et * scalings_.at(2));
 }
 
 DEFINE_FWK_MODULE(L1TEGammaFilteredCollectionProducer);
