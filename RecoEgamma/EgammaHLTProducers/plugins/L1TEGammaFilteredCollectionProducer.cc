@@ -53,7 +53,7 @@ class L1TEGammaFilteredCollectionProducer : public edm::global::EDProducer<> {
   int maxBX_;
   double minPt_;
   std::vector<double> scalings_;  // pT scaling factors
-  double getOfflineEt(double Et) const;
+  double getOfflineEt(double et) const;
 };
 
 L1TEGammaFilteredCollectionProducer::L1TEGammaFilteredCollectionProducer(
