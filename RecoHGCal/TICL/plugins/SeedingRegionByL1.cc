@@ -21,14 +21,12 @@ ticl::SeedingRegionByL1::SeedingRegionByL1(const edm::ParameterSet &conf,
     : SeedingRegionAlgoBase(conf, sumes),
       l1TkEmsToken_(sumes.consumes<std::vector<l1t::TkEm>>(
           conf.getParameter<edm::InputTag>("l1TkEmColl"))),
-      algo_verbosity_(conf.getParameter<int>("algo_verbosity")),
+      algoVerbosity_(conf.getParameter<int>("algo_verbosity")),
       minPt_(conf.getParameter<double>("minPt")),
       minAbsEta_(conf.getParameter<double>("minAbsEta")),
       maxAbsEta_(conf.getParameter<double>("maxAbsEta")),
       endcapScalings_(conf.getParameter<std::vector<double>>("endcapScalings")),
       quality_(conf.getParameter<int>("quality")) {}
-
-ticl::SeedingRegionByL1::~SeedingRegionByL1() {}
 
 void ticl::SeedingRegionByL1::makeRegions(
     const edm::Event &ev, const edm::EventSetup &es,
