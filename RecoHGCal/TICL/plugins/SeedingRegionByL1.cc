@@ -48,7 +48,7 @@ void ticl::SeedingRegionByL1::makeRegions(
         GlobalPoint(l1TrkEm.p4().X(), l1TrkEm.p4().Y(), l1TrkEm.p4().Z()),
         GlobalVector(l1TrkEm.px(), l1TrkEm.py(), l1TrkEm.pz()), iSide, indx,
         l1tkemsId);
-    indx++;
+    //indx++;
   }
 
   std::sort(result.begin(), result.end(),
