@@ -25,6 +25,7 @@
 #include "RecoEgamma/EgammaElectronAlgos/interface/GsfElectronAlgo.h"
 #include "RecoEgamma/EgammaElectronAlgos/interface/ecalClusterEnergyUncertaintyElectronSpecific.h"
 #include "CommonTools/Egamma/interface/ConversionTools.h"
+#include "RecoEgamma/EgammaTools/interface/ECALGapCoordinates.h"
 
 #include <Math/Point3D.h>
 #include <memory>
@@ -789,8 +790,10 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection& electrons,
   //====================================================
   // FiducialFlags, using nextToBoundary definition of gaps
   // Update (March 2021): only nextToBoundary can't tag all gap electrons.
-  // So, additionally, use hard-coded geometry numbers for better tagging.
+  // So, additionally, use geometry numbers for better tagging.
   //====================================================
+
+  //std::vector<int> barrelGapIEta = {1,25,26,45,46,65,66,85};
 
   reco::GsfElectron::FiducialFlags fiducialFlags;
   int region = seedXtalId.det();
@@ -809,21 +812,12 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection& electrons,
     if (EBDetId::isNextToPhiBoundary(ebdetid)) {
       fiducialFlags.isEBPhiGap = true;
     }
-    // use hard coded geometry numbers
-    // following are |ieta| of eta gaps in EB
-    if ( (ebdetid.ietaAbs() == 1)  || 
-	 (ebdetid.ietaAbs() == 25) || 
-	 (ebdetid.ietaAbs() == 26) || 
-	 (ebdetid.ietaAbs() == 45) || 
-	 (ebdetid.ietaAbs() == 46) || 
-	 (ebdetid.ietaAbs() == 65) || 
-	 (ebdetid.ietaAbs() == 66) || 
-	 (ebdetid.ietaAbs() == 85) )  {
+    int thisIEtaUnit=ebdetid.ietaAbs();
+    if ( std::any_of(barrelGapIEta.begin(), barrelGapIEta.end(), [thisIEtaUnit](int gapUnit){return thisIEtaUnit==gapUnit;}) == true) {
       fiducialFlags.isEBEtaGap = true;
     }
-    // following are |iphi| of phi gaps in EB
-    if ( (ebdetid.iphi()%20==0) ||  
-	 (ebdetid.iphi()%20==1) ) {
+    if ( (ebdetid.iphi()%barrelGapIphiStepSize==0) ||  
+	 (ebdetid.iphi()%barrelGapIphiStepSize==1) ) {
       fiducialFlags.isEBPhiGap = true;
     }
   } else if (detector == EcalEndcap) {
@@ -839,28 +833,12 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection& electrons,
     if (EEDetId::isNextToDBoundary(eedetid)) {
       fiducialFlags.isEEDeeGap = true;
     }
-    if ( (eedetid.ix() == 40) || 
-	 (eedetid.ix() == 41) || 
-	 (eedetid.ix() == 45) || 
-	 (eedetid.ix() == 46) || 
-	 (eedetid.ix() == 50) || 
-	 (eedetid.ix() == 51) || 
-	 (eedetid.ix() == 55) || 
-	 (eedetid.ix() == 56) || 
-	 (eedetid.ix() == 60) || 
-	 (eedetid.ix() == 61) ) {
+    int thisIxUnit=eedetid.ix();
+    if ( std::any_of(endcapGapIxIy.begin(), endcapGapIxIy.end(), [thisIxUnit](int gapUnit){return thisIxUnit==gapUnit;}) == true) {
       fiducialFlags.isEEDeeGap = true;
     }
-    if ( (eedetid.iy() == 40) || 
-	 (eedetid.iy() == 41) || 
-	 (eedetid.iy() == 45) || 
-	 (eedetid.iy() == 46) || 
-	 (eedetid.iy() == 50) || 
-	 (eedetid.iy() == 51) || 
-	 (eedetid.iy() == 55) || 
-	 (eedetid.iy() == 56) || 
-	 (eedetid.iy() == 60) || 
-	 (eedetid.iy() == 61) ) {
+    int thisIyUnit=eedetid.iy();
+    if ( std::any_of(endcapGapIxIy.begin(), endcapGapIxIy.end(), [thisIyUnit](int gapUnit){return thisIyUnit==gapUnit;}) == true) {
       fiducialFlags.isEERingGap = true;
     }
   } else if (EcalTools::isHGCalDet((DetId::Detector)region)) {
