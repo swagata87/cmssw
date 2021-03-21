@@ -36,9 +36,11 @@
 
 #include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgoRcd.h"
+#include "RecoEgamma/EgammaTools/interface/ECALGapCoordinates.h"
 
 #include <string>
 #include <TMath.h>
+#include <algorithm>
 
 void PhotonIsolationCalculator::setup(const edm::ParameterSet& conf,
                                       std::vector<int> const& flagsEB,
@@ -544,10 +546,16 @@ void PhotonIsolationCalculator::classify(const reco::Photon* photon,
       else
         isEBEtaGap = true;
     }
-
+    int thisIEtaUnit=EBDetId(seedXtalId).ietaAbs();
+    if ( std::any_of(barrelGapIEta.begin(), barrelGapIEta.end(), [thisIEtaUnit](int gapUnit){return thisIEtaUnit==gapUnit;}) == true) {
+      isEBEtaGap = true;
+    }
     if (EBDetId::isNextToPhiBoundary(EBDetId(seedXtalId)))
       isEBPhiGap = true;
-
+    if ( (EBDetId(seedXtalId).iphi()%barrelGapIphiStepSize==0) ||  
+	 (EBDetId(seedXtalId).iphi()%barrelGapIphiStepSize==1) ) {
+      isEBPhiGap = true;
+    }
   } else if (detector == EcalEndcap) {
     isEEPho = true;
     if (EEDetId::isNextToRingBoundary(EEDetId(seedXtalId))) {
@@ -556,9 +564,16 @@ void PhotonIsolationCalculator::classify(const reco::Photon* photon,
       else
         isEERingGap = true;
     }
-
     if (EEDetId::isNextToDBoundary(EEDetId(seedXtalId)))
       isEEDeeGap = true;
+    int thisIxUnit=EEDetId(seedXtalId).ix();
+    if ( std::any_of(endcapGapIxIy.begin(), endcapGapIxIy.end(), [thisIxUnit](int gapUnit){return thisIxUnit==gapUnit;}) == true) {
+      isEEDeeGap = true;
+    }
+    int thisIyUnit=EEDetId(seedXtalId).iy();
+    if ( std::any_of(endcapGapIxIy.begin(), endcapGapIxIy.end(), [thisIyUnit](int gapUnit){return thisIyUnit==gapUnit;}) == true) {
+      isEEDeeGap = true;
+    }
   }
 }
 

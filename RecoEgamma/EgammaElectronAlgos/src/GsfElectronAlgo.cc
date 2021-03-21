@@ -793,8 +793,6 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection& electrons,
   // So, additionally, use geometry numbers for better tagging.
   //====================================================
 
-  //std::vector<int> barrelGapIEta = {1,25,26,45,46,65,66,85};
-
   reco::GsfElectron::FiducialFlags fiducialFlags;
   int region = seedXtalId.det();
   int detector = seedXtalId.subdetId();
@@ -839,7 +837,7 @@ void GsfElectronAlgo::createElectron(reco::GsfElectronCollection& electrons,
     }
     int thisIyUnit=eedetid.iy();
     if ( std::any_of(endcapGapIxIy.begin(), endcapGapIxIy.end(), [thisIyUnit](int gapUnit){return thisIyUnit==gapUnit;}) == true) {
-      fiducialFlags.isEERingGap = true;
+      fiducialFlags.isEEDeeGap = true;
     }
   } else if (EcalTools::isHGCalDet((DetId::Detector)region)) {
     fiducialFlags.isEE = true;
