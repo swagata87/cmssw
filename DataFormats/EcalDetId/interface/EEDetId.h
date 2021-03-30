@@ -350,6 +350,7 @@ private:
 
   static const unsigned short kxf[2 * IY_MAX];
   static const unsigned short kdi[2 * IY_MAX];
+  static const int kDeeBoundaries[10];
 
   int ix(int iSC, int iCrys) const;
   int iy(int iSC, int iCrys) const;

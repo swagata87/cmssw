@@ -138,7 +138,7 @@ public:
   static const int kChannelsPerCard = 5;
   static const int kTowersInPhi = 4;  // per SM
   static const int kModulesPerSM = 4;
-  static const int kModuleBoundaries[4];
+  static const int kModuleBoundaries[7];
   static const int kCrystalsInPhi = 20;  // per SM
   static const int kCrystalsInEta = 85;  // per SM
   static const int kCrystalsPerSM = 1700;

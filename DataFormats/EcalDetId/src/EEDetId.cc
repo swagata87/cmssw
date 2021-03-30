@@ -3,6 +3,9 @@
 
 #include <algorithm>
 
+// hardcoded ix/iy values for D boundary
+const int EEDetId::kDeeBoundaries[10] = {40, 41, 45, 46, 50, 51, 55, 56, 60, 61};
+
 const int EEDetId::QuadColLimits[EEDetId::nCols + 1] = {0, 8, 17, 27, 36, 45, 54, 62, 70, 76, 79};
 
 const int EEDetId::iYoffset[EEDetId::nCols + 1] = {0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -277,8 +280,9 @@ int EEDetId::ic() const {
 bool EEDetId::isNextToBoundary(EEDetId id) { return isNextToDBoundary(id) || isNextToRingBoundary(id); }
 
 bool EEDetId::isNextToDBoundary(EEDetId id) {
-  // hardcoded values for D boundary
-  return id.ix() == 50 || id.ix() == 51;
+  bool isGapIx = (kDeeBoundaries + 10) != std::find(kDeeBoundaries, kDeeBoundaries + 10, id.ix());
+  bool isGapIy = (kDeeBoundaries + 10) != std::find(kDeeBoundaries, kDeeBoundaries + 10, id.iy());
+  return isGapIx || isGapIy;
 }
 
 bool EEDetId::isNextToRingBoundary(EEDetId id) {

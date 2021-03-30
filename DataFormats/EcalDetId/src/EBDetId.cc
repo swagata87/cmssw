@@ -2,7 +2,7 @@
 #include "FWCore/Utilities/interface/Exception.h"
 
 #include <algorithm>
-const int EBDetId::kModuleBoundaries[4] = {25, 45, 65, 85};
+const int EBDetId::kModuleBoundaries[7] = {25, 26, 45, 46, 65, 66, 85};
 
 // pi / 180.
 const float EBDetId::crystalUnitToEta = 0.017453292519943295;
@@ -107,7 +107,7 @@ bool EBDetId::isNextToBoundary(EBDetId id) { return isNextToEtaBoundary(id) || i
 
 bool EBDetId::isNextToEtaBoundary(EBDetId id) {
   int ieta = id.ietaSM();
-  return ieta == 1 || (kModuleBoundaries + 4) != std::find(kModuleBoundaries, kModuleBoundaries + 4, ieta);
+  return ieta == 1 || (kModuleBoundaries + 7) != std::find(kModuleBoundaries, kModuleBoundaries + 7, ieta);
 }
 
 bool EBDetId::isNextToPhiBoundary(EBDetId id) {
