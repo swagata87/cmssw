@@ -70,7 +70,7 @@ MaxHitsTrajectoryFilter_block = cms.PSet(
 )
 MinHitsTrajectoryFilter_block = cms.PSet(
     ComponentType = cms.string('MinHitsTrajectoryFilter'),
-    minimumNumberOfHits = cms.int32(5)
+    minimumNumberOfHits = cms.int32(5),
     highEtaSwitch = cms.double(5.0),
     minHitsAtHighEta = cms.int32(5)
 )
