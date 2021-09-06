@@ -10,7 +10,6 @@
 */
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-//#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "FWCore/Framework/interface/ESProducer.h"
