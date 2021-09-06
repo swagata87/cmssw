@@ -12,6 +12,8 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "FWCore/Framework/interface/ESProducer.h"
 
 #include <string>
 #include <vector>
@@ -38,7 +40,7 @@ public:
   void beginJob() override;
   void beginRun(const edm::Run& run, const edm::EventSetup& setup) override;
   void analyze(const edm::Event& e, const edm::EventSetup& c) override;
-  void endJob() override;
+  void endJob(const edm::EventSetup& c);
 
 private:
   std::string getChannelName(const DTWireId&) const;
@@ -73,7 +75,8 @@ private:
   time_t runEndTime_;
 
   // Get the DT Geometry
-  edm::ESHandle<DTGeometry> dtGeom_;
+  edm::ESGetToken<DTGeometry, MuonGeometryRecord> dtToken_;
+
   // tTrig map
   edm::ESHandle<DTTtrig> tTrigMap_;
 

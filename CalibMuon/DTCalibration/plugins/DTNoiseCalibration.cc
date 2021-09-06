@@ -51,14 +51,14 @@ DTNoiseCalibration::DTNoiseCalibration(const edm::ParameterSet& pset)
       dbLabel_(pset.getUntrackedParameter<string>("dbLabel", "")),
       //fastAnalysis_( pset.getParameter<bool>("fastAnalysis", true) ),
       wireIdWithHisto_(std::vector<DTWireId>()),
-      lumiMax_(3000) {
+      lumiMax_(3000),
+      dtToken_(esConsumes()) {
   // Get the debug parameter for verbose output
   //debug = ps.getUntrackedParameter<bool>("debug");
   /*// The analysis type
   // The wheel & sector interested for the time-dependent analysis
   wh = ps.getUntrackedParameter<int>("wheel", 0);
   sect = ps.getUntrackedParameter<int>("sector", 6);*/
-
   if (pset.exists("defaultTtrig")) {
     readDB_ = false;
     defaultTtrig_ = pset.getParameter<int>("defaultTtrig");
@@ -95,8 +95,6 @@ void DTNoiseCalibration::beginJob() {
 }
 
 void DTNoiseCalibration::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
-  // Get the DT Geometry
-  setup.get<MuonGeometryRecord>().get(dtGeom_);
 
   // tTrig
   if (readDB_)
@@ -173,9 +171,8 @@ void DTNoiseCalibration::analyze(const edm::Event& event, const edm::EventSetup&
 
       /*LogTrace("Calibration") << "TDC time (ns): " << ((float)tdcTime*25)/32
                                 <<" --- trigger width (ns): " << ((float)upperLimit*25)/32;*/
-
       const DTLayerId dtLId = (*dtLayerId_It).first;
-      const DTTopology& dtTopo = dtGeom_->layer(dtLId)->specificTopology();
+      const DTTopology& dtTopo = setup.getData(dtToken_).layer(dtLId)->specificTopology();
       const int firstWire = dtTopo.firstChannel();
       const int lastWire = dtTopo.lastChannel();
       //const int nWires = dtTopo.channels();
@@ -324,7 +321,7 @@ void DTNoiseCalibration::analyze(const edm::Event& event, const edm::EventSetup&
   }*/
 }
 
-void DTNoiseCalibration::endJob() {
+void DTNoiseCalibration::endJob(const edm::EventSetup& setup) {
   //LogVerbatim("Calibration") << "[DTNoiseCalibration] endjob called!";
   LogVerbatim("Calibration") << "[DTNoiseCalibration] Total number of events analyzed: " << nevents_;
 
@@ -384,7 +381,7 @@ void DTNoiseCalibration::endJob() {
       (*lHisto).second->Scale(normalization);
       rootFile_->cd();
       (*lHisto).second->Write();
-      const DTTopology& dtTopo = dtGeom_->layer((*lHisto).first)->specificTopology();
+      const DTTopology& dtTopo = setup.getData(dtToken_).layer((*lHisto).first)->specificTopology();
       const int firstWire = dtTopo.firstChannel();
       const int lastWire = dtTopo.lastChannel();
       //const int nWires = dtTopo.channels();
