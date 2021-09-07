@@ -35,7 +35,7 @@ DTFakeT0ESProducer::DTFakeT0ESProducer(const edm::ParameterSet& pset) {
   t0Mean = pset.getParameter<double>("t0Mean");
   t0Sigma = pset.getParameter<double>("t0Sigma");
   cpvTokenDDD_ = cc.consumesFrom<DDCompactView, IdealGeometryRecord>(edm::ESInputTag());
-
+  mdcToken_ = cc.consumes();
 }
 
 DTFakeT0ESProducer::~DTFakeT0ESProducer() {}
@@ -61,12 +61,13 @@ std::unique_ptr<DTT0> DTFakeT0ESProducer::produce(const DTT0Rcd& iRecord) {
 }
 
 void DTFakeT0ESProducer::parseDDD(const DTT0Rcd& iRecord) {
-  edm::ESHandle<MuonGeometryConstants> mdc;
-  iRecord.getRecord<IdealGeometryRecord>().get(mdc);
+  //  edm::ESHandle<MuonGeometryConstants> mdc;
+  // iRecord.getRecord<IdealGeometryRecord>().get(mdc);
 
   edm::ESTransientHandle<DDCompactView> cpv = iRecord.getTransientHandle(cpvTokenDDD_);
+  const auto& mdc = iRecord.get(mdcToken_);
 
-  DTGeometryParserFromDDD parser(&(*cpv), *mdc, theLayerIdWiresMap);
+  DTGeometryParserFromDDD parser(&(*cpv), mdc, theLayerIdWiresMap);
 }
 
 void DTFakeT0ESProducer::setIntervalFor(const edm::eventsetup::EventSetupRecordKey&,

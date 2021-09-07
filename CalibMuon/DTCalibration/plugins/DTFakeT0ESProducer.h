@@ -24,6 +24,8 @@
 #include "DetectorDescription/Core/interface/DDCompactView.h"
 #include "DetectorDescription/DDCMS/interface/DDCompactView.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
+#include "Geometry/MuonNumbering/interface/MuonGeometryConstants.h"
+
 //#include <pair>
 #include <map>
 
@@ -53,6 +55,7 @@ private:
   double t0Sigma;
 
   edm::ESGetToken<DDCompactView, IdealGeometryRecord> cpvTokenDDD_;
+  edm::ESGetToken<MuonGeometryConstants, IdealGeometryRecord> mdcToken_;
 
 };
 #endif
