@@ -10,9 +10,9 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/Framework/interface/ESHandle.h"
-
 #include "CalibMuon/DTCalibration/interface/DTSegmentSelector.h"
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "FWCore/Framework/interface/ESProducer.h"
 
 #include <string>
 #include <vector>
@@ -42,7 +42,7 @@ private:
   unsigned int nevent;
   unsigned int segmok, segmbad;
 
-  float segmentToWireDistance(const DTRecHit1D& recHit1D, const DTRecSegment4D& segment);
+  float segmentToWireDistance(const DTRecHit1D& recHit1D, const DTRecSegment4D& segment, const edm::EventSetup& c);
   // Book a set of histograms for a given super-layer/layer
   void bookHistos(DTSuperLayerId slId);
   void bookHistos(DTLayerId slId);
@@ -58,7 +58,8 @@ private:
   bool detailedAnalysis_;
   TFile* rootFile_;
   // Geometry
-  const DTGeometry* dtGeom_;
+  edm::ESGetToken<DTGeometry, MuonGeometryRecord> dtToken_;
+
   // Histograms per super-layer
   std::map<DTSuperLayerId, TH1F*> histoMapTH1F_;
   std::map<DTSuperLayerId, TH2F*> histoMapTH2F_;
