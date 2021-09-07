@@ -38,7 +38,8 @@
 using namespace edm;
 using namespace std;
 
-DTNoiseComputation::DTNoiseComputation(const edm::ParameterSet &ps) {
+DTNoiseComputation::DTNoiseComputation(const edm::ParameterSet &ps) 
+  : dtToken_(esConsumes()) {
   cout << "[DTNoiseComputation]: Constructor" << endl;
 
   // Get the debug parameter for verbose output
@@ -60,8 +61,6 @@ DTNoiseComputation::DTNoiseComputation(const edm::ParameterSet &ps) {
 }
 
 void DTNoiseComputation::beginRun(const edm::Run &, const EventSetup &setup) {
-  // Get the DT Geometry
-  setup.get<MuonGeometryRecord>().get(dtGeom);
 
   static int count = 0;
 
@@ -84,8 +83,8 @@ void DTNoiseComputation::beginRun(const edm::Run &, const EventSetup &setup) {
     TH1F *hsomeHowNoisyC;
 
     // Loop over all the chambers
-    vector<const DTChamber *>::const_iterator ch_it = dtGeom->chambers().begin();
-    vector<const DTChamber *>::const_iterator ch_end = dtGeom->chambers().end();
+    vector<const DTChamber *>::const_iterator ch_it = setup.getData(dtToken_).chambers().begin();
+    vector<const DTChamber *>::const_iterator ch_end = setup.getData(dtToken_).chambers().end();
     // Loop over the SLs
     for (; ch_it != ch_end; ++ch_it) {
       DTChamberId ch = (*ch_it)->id();
@@ -211,7 +210,7 @@ void DTNoiseComputation::beginRun(const edm::Run &, const EventSetup &setup) {
   }
 }
 
-void DTNoiseComputation::endJob() {
+void DTNoiseComputation::endJob(const edm::EventSetup& setup) {
   cout << "[DTNoiseComputation] endjob called!" << endl;
   TH1F *hEvtDistance = nullptr;
   TF1 *ExpoFit = new TF1("ExpoFit", "expo", 0.5, 1000.5);
@@ -316,8 +315,8 @@ void DTNoiseComputation::endJob() {
 
   //overimpose the average noise histo
   bool histo = false;
-  vector<const DTChamber *>::const_iterator chamber_it = dtGeom->chambers().begin();
-  vector<const DTChamber *>::const_iterator chamber_end = dtGeom->chambers().end();
+  vector<const DTChamber *>::const_iterator chamber_it = setup.getData(dtToken_).chambers().begin();
+  vector<const DTChamber *>::const_iterator chamber_end = setup.getData(dtToken_).chambers().end();
   // Loop over the chambers
   for (; chamber_it != chamber_end; ++chamber_it) {
     vector<const DTSuperLayer *>::const_iterator sl_it = (*chamber_it)->superLayers().begin();

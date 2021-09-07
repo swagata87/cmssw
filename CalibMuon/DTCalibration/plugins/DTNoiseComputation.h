@@ -13,7 +13,8 @@
 #include "DataFormats/MuonDetId/interface/DTLayerId.h"
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 #include "DataFormats/MuonDetId/interface/DTChamberId.h"
-#include "FWCore/Framework/interface/ESHandle.h"
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "FWCore/Framework/interface/ESProducer.h"
 
 #include <string>
 #include <map>
@@ -46,7 +47,7 @@ public:
   void analyze(const edm::Event& event, const edm::EventSetup& setup) override {}
 
   /// Endjob
-  void endJob() override;
+  void endJob(const edm::EventSetup& c);
 
 protected:
 private:
@@ -56,7 +57,7 @@ private:
   bool fastAnalysis;
 
   // Get the DT Geometry
-  edm::ESHandle<DTGeometry> dtGeom;
+  edm::ESGetToken<DTGeometry, MuonGeometryRecord> dtToken_;
 
   // The file which contain the occupancy plot and the digi event plot
   TFile* theFile;
