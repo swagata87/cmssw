@@ -10,6 +10,9 @@ from RecoParticleFlow.PFProducer.particleFlowTmpPtrs_cfi import *
 
 particleFlowTmp = particleFlow.clone()
 
+##temporary for 12_1; EtaExtendedEles do not enter PF because ID/regression is not ready yet
+particleFlowTmp.PFEGammaFiltersParameters.allowEEEinPF = cms.bool(False)
+
 from Configuration.Eras.Modifier_pf_badHcalMitigationOff_cff import pf_badHcalMitigationOff
 pf_badHcalMitigationOff.toModify(particleFlowTmp.PFEGammaFiltersParameters,
                                  electron_protectionsForBadHcal = dict(enableProtections = False),
@@ -17,3 +20,4 @@ pf_badHcalMitigationOff.toModify(particleFlowTmp.PFEGammaFiltersParameters,
 
 from Configuration.ProcessModifiers.egamma_lowPt_exclusive_cff import egamma_lowPt_exclusive
 egamma_lowPt_exclusive.toModify(particleFlowTmp.PFEGammaFiltersParameters,photon_MinEt = 1.)
+
