@@ -17,6 +17,24 @@ from HLTrigger.Configuration.common import *
 #                     pset.minGoodStripCharge = cms.PSet(refToPSet_ = cms.string('HLTSiStripClusterChargeCutNone'))
 #     return process
 
+# Eta Extended Electrons 
+def customiseForPRNUM(process):
+    for pset in process._Process__psets.values():
+        if hasattr(pset,'ComponentType'):
+            if (pset.ComponentType == 'CkfBaseTrajectoryFilter'):
+                if not hasattr(pset, 'highEtaSwitch'):
+                    pset.highEtaSwitch = cms.double(5.0)
+                if not hasattr(pset, 'minHitsAtHighEta'):
+                    pset.minHitsAtHighEta = cms.int32(5)
+
+    for esp in esproducers_by_type(process, 'KFFittingSmootherESProducer'):
+        if not hasattr(esp, 'HighEtaSwitch'):
+            esp.HighEtaSwitch = cms.double(5.0)
+        if not hasattr(esp, 'MinNumberOfHitsHighEta'):
+            esp.MinNumberOfHitsHighEta = cms.int32(5)
+
+    return process
+
 # New cards in DT local reco to control which format for DT DB is used
 def customiseFor34612(process):    
     for producer in producers_by_type(process, "DTRecHitProducer"):
@@ -152,5 +170,6 @@ def customizeHLTforCMSSW(process, menuType="GRun"):
 
     # New cards for DT local reco
     process = customiseFor34612(process)
+    process = customiseForPRNUM(process)
 
     return process
