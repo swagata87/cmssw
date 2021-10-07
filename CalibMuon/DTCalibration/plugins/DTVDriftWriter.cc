@@ -40,7 +40,7 @@ DTVDriftWriter::DTVDriftWriter(const ParameterSet& pset)
       mTimeMap_(nullptr),
       vDriftMap_(nullptr),
       vDriftAlgo_{DTVDriftPluginFactory::get()->create(pset.getParameter<string>("vDriftAlgo"),
-                                                       pset.getParameter<ParameterSet>("vDriftAlgoConfig"))} {
+                                                       pset.getParameter<ParameterSet>("vDriftAlgoConfig"),consumesCollector()) } {
   LogVerbatim("Calibration") << "[DTVDriftWriter]Constructor called!";
 
   if (granularity_ != "bySL")
