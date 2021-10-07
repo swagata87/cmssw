@@ -42,7 +42,7 @@ using namespace edm;
 
 namespace dtCalibration {
 
-  DTTTrigResidualCorrection::DTTTrigResidualCorrection(const ParameterSet& pset) {
+  DTTTrigResidualCorrection::DTTTrigResidualCorrection(const ParameterSet& pset, edm::ConsumesCollector cc) {
     string residualsRootFile = pset.getParameter<string>("residualsRootFile");
     rootFile_ = new TFile(residualsRootFile.c_str(), "READ");
     rootBaseDir_ = pset.getUntrackedParameter<string>("rootBaseDir", "/DQMData/DT/DTCalibValidation");
@@ -51,6 +51,9 @@ namespace dtCalibration {
     dbLabel_ = pset.getUntrackedParameter<string>("dbLabel", "");
     useSlopesCalib_ = pset.getUntrackedParameter<bool>("useSlopesCalib", false);
     readLegacyVDriftDB = pset.getParameter<bool>("readLegacyVDriftDB");
+    ttrigToken_ = cc.esConsumes(edm::ESInputTag("", pset.getParameter<string>("dbLabel")));
+    mTimeMapToken_ = cc.esConsumes();
+    vDriftMapToken_ = cc.esConsumes();
 
     // Load external slopes
     if (useSlopesCalib_) {
@@ -81,20 +84,17 @@ namespace dtCalibration {
   void DTTTrigResidualCorrection::setES(const EventSetup& setup) {
     // Get tTrig record from DB
     ESHandle<DTTtrig> tTrig;
-    //setup.get<DTTtrigRcd>().get(tTrig);
-    setup.get<DTTtrigRcd>().get(dbLabel_, tTrig);
+    tTrig = setup.getHandle(ttrigToken_);
     tTrigMap_ = &*tTrig;
 
     // Get vDrift record
     if (readLegacyVDriftDB) {
       ESHandle<DTMtime> mTimeHandle;
-      setup.get<DTMtimeRcd>().get(mTimeHandle);
-      mTimeMap_ = &*mTimeHandle;
+      mTimeMap_ = &setup.getData(mTimeMapToken_);
       vDriftMap_ = nullptr;
     } else {
       ESHandle<DTRecoConditions> hVdrift;
-      setup.get<DTRecoConditionsVdriftRcd>().get(hVdrift);
-      vDriftMap_ = &*hVdrift;
+      vDriftMap_ = &setup.getData(vDriftMapToken_);
       mTimeMap_ = nullptr;
       // Consistency check: no parametrization is implemented for the time being
       int version = vDriftMap_->version();

@@ -9,6 +9,10 @@
  */
 
 #include "CalibMuon/DTCalibration/interface/DTTTrigBaseCorrection.h"
+#include "CondFormats/DataRecord/interface/DTTtrigRcd.h"
+#include "CondFormats/DataRecord/interface/DTMtimeRcd.h"
+#include "CondFormats/DataRecord/interface/DTRecoConditionsVdriftRcd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include <string>
 
@@ -29,7 +33,7 @@ namespace dtCalibration {
   class DTTTrigResidualCorrection : public DTTTrigBaseCorrection {
   public:
     // Constructor
-    DTTTrigResidualCorrection(const edm::ParameterSet&);
+    DTTTrigResidualCorrection(const edm::ParameterSet&, edm::ConsumesCollector cc);
 
     // Destructor
     ~DTTTrigResidualCorrection() override;
@@ -56,6 +60,11 @@ namespace dtCalibration {
     bool readLegacyVDriftDB;             // which one to use
 
     DTResidualFitter* fitter_;
+
+    edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_;
+    edm::ESGetToken<DTMtime, DTMtimeRcd> mTimeMapToken_;
+    edm::ESGetToken<DTRecoConditions, DTRecoConditionsVdriftRcd> vDriftMapToken_;
+
   };
 
 }  // namespace dtCalibration

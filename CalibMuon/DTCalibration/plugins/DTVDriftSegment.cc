@@ -60,14 +60,8 @@ namespace dtCalibration {
   void DTVDriftSegment::setES(const edm::EventSetup& setup) {
     // Get the map of vdrift from the setup
     if (readLegacyVDriftDB) {
-      //ESHandle<DTMtime> mTime;
-      //setup.get<DTMtimeRcd>().get(mTime);
-      //      mTimeMap_ = &*mTime;
       mTimeMap_ = &setup.getData(mTimeMapToken_);
     } else {
-      //ESHandle<DTRecoConditions> hVdrift;
-      //setup.get<DTRecoConditionsVdriftRcd>().get(hVdrift);
-      //vDriftMap_ = &*hVdrift;
       vDriftMap_ = &setup.getData(vDriftMapToken_);
       // Consistency check: no parametrization is implemented for the time being
       int version = vDriftMap_->version();
