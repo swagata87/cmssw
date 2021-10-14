@@ -46,9 +46,9 @@ namespace dtCalibration {
 
     readLegacyVDriftDB = pset.getParameter<bool>("readLegacyVDriftDB");
     if (readLegacyVDriftDB) {
-      mTimeMapToken_ = cc.esConsumes();
+      mTimeMapToken_ = cc.esConsumes<edm::Transition::BeginRun>();
     } else {
-      vDriftMapToken_ = cc.esConsumes();
+      vDriftMapToken_ = cc.esConsumes<edm::Transition::BeginRun>();
     }
   }
 
