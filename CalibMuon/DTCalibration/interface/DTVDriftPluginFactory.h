@@ -9,13 +9,15 @@
  */
 
 #include "FWCore/PluginManager/interface/PluginFactory.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 namespace edm {
   class ParameterSet;
+  class ConsumesCollector;
 }
 namespace dtCalibration {
   class DTVDriftBaseAlgo;
 }
 
-typedef edmplugin::PluginFactory<dtCalibration::DTVDriftBaseAlgo *(const edm::ParameterSet &)> DTVDriftPluginFactory;
+typedef edmplugin::PluginFactory<dtCalibration::DTVDriftBaseAlgo *(const edm::ParameterSet &, edm::ConsumesCollector)> DTVDriftPluginFactory;
 #endif

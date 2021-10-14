@@ -23,10 +23,11 @@ using namespace edm;
 
 namespace dtCalibration {
 
-  DTTTrigT0SegCorrection::DTTTrigT0SegCorrection(const ParameterSet& pset) {
+  DTTTrigT0SegCorrection::DTTTrigT0SegCorrection(const ParameterSet& pset, edm::ConsumesCollector cc) {
     string t0SegRootFile = pset.getParameter<string>("t0SegRootFile");
     rootFile_ = new TFile(t0SegRootFile.c_str(), "READ");
     dbLabel = pset.getUntrackedParameter<string>("dbLabel", "");
+    ttrigToken_ = cc.esConsumes(edm::ESInputTag("", pset.getParameter<string>("dbLabel")));
   }
 
   DTTTrigT0SegCorrection::~DTTTrigT0SegCorrection() { delete rootFile_; }
@@ -34,7 +35,7 @@ namespace dtCalibration {
   void DTTTrigT0SegCorrection::setES(const EventSetup& setup) {
     // Get tTrig record from DB
     ESHandle<DTTtrig> tTrig;
-    setup.get<DTTtrigRcd>().get(dbLabel, tTrig);
+    tTrig = setup.getHandle(ttrigToken_);
     tTrigMap_ = &*tTrig;
   }
 

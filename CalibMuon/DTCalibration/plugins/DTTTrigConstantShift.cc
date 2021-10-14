@@ -12,6 +12,7 @@
 #include "DataFormats/MuonDetId/interface/DTSuperLayerId.h"
 #include "CondFormats/DTObjects/interface/DTTtrig.h"
 #include "CondFormats/DataRecord/interface/DTTtrigRcd.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include <cmath>
 
@@ -20,10 +21,11 @@ using namespace edm;
 
 namespace dtCalibration {
 
-  DTTTrigConstantShift::DTTTrigConstantShift(const ParameterSet& pset)
+  DTTTrigConstantShift::DTTTrigConstantShift(const ParameterSet& pset, edm::ConsumesCollector cc)
       : dbLabel_(pset.getUntrackedParameter<string>("dbLabel", "")),
         calibChamber_(pset.getParameter<string>("calibChamber")),
         value_(pset.getParameter<double>("value")) {
+    ttrigToken_ = cc.esConsumes(edm::ESInputTag("", pset.getParameter<string>("dbLabel"))) ;
     LogVerbatim("Calibration") << "[DTTTrigConstantShift] Applying constant correction value: " << value_ << endl;
 
     if (!calibChamber_.empty() && calibChamber_ != "None" && calibChamber_ != "All") {
@@ -42,7 +44,7 @@ namespace dtCalibration {
   void DTTTrigConstantShift::setES(const EventSetup& setup) {
     // Get tTrig record from DB
     ESHandle<DTTtrig> tTrig;
-    setup.get<DTTtrigRcd>().get(dbLabel_, tTrig);
+    tTrig = setup.getHandle(ttrigToken_);
     tTrigMap_ = &*tTrig;
   }
 

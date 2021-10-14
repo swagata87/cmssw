@@ -19,8 +19,9 @@ using namespace edm;
 
 namespace dtCalibration {
 
-  DTTTrigMatchRPhi::DTTTrigMatchRPhi(const ParameterSet& pset) {
+  DTTTrigMatchRPhi::DTTTrigMatchRPhi(const ParameterSet& pset, edm::ConsumesCollector cc) {
     dbLabel = pset.getUntrackedParameter<string>("dbLabel", "");
+    ttrigToken_ = cc.esConsumes(edm::ESInputTag("", pset.getParameter<string>("dbLabel"))) ;
   }
 
   DTTTrigMatchRPhi::~DTTTrigMatchRPhi() {}
@@ -28,7 +29,7 @@ namespace dtCalibration {
   void DTTTrigMatchRPhi::setES(const EventSetup& setup) {
     // Get tTrig record from DB
     ESHandle<DTTtrig> tTrig;
-    setup.get<DTTtrigRcd>().get(dbLabel, tTrig);
+    tTrig = setup.getHandle(ttrigToken_);
     tTrigMap_ = &*tTrig;
   }
 
