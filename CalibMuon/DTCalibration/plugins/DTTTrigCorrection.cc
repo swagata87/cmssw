@@ -38,8 +38,8 @@ DTTTrigCorrection::DTTTrigCorrection(const ParameterSet& pset)
     : dbLabel_(pset.getUntrackedParameter<string>("dbLabel", "")),
       correctionAlgo_{DTTTrigCorrectionFactory::get()->create(
 			pset.getParameter<string>("correctionAlgo"), pset.getParameter<ParameterSet>("correctionAlgoConfig"), consumesCollector())  } {
-  ttrigToken_ = esConsumes(edm::ESInputTag("", pset.getParameter<string>("dbLabel")));
-  dtGeomToken_ = esConsumes();
+  ttrigToken_ = esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
+  dtGeomToken_ = esConsumes<edm::Transition::BeginRun>();
   LogVerbatim("Calibration") << "[DTTTrigCorrection] Constructor called" << endl;
 }
 
@@ -56,6 +56,7 @@ void DTTTrigCorrection::beginRun(const edm::Run& run, const edm::EventSetup& set
 
   // Get geometry from Event Setup
   muonGeom_ = setup.getHandle(dtGeomToken_);
+
   // Pass EventSetup to correction Algo
   correctionAlgo_->setES(setup);
 }

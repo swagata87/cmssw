@@ -36,7 +36,6 @@ namespace dtCalibration {
     DTTTrigData correction(const DTSuperLayerId&) override;
 
   private:
-    std::string dbLabel_;
     std::string calibChamber_;
     double value_;
 

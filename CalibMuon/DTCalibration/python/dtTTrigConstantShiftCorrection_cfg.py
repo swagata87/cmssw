@@ -8,7 +8,8 @@ process.MessageLogger.debugModules = cms.untracked.vstring('dtTTrigConstantShift
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = ''
+from Configuration.AlCa.autoCond import autoCond
+process.GlobalTag.globaltag = autoCond['run3_data_prompt']
 
 process.load("CondCore.CondDB.CondDB_cfi")
 
@@ -33,7 +34,7 @@ process.PoolDBOutputService.connect = cms.string('sqlite_file:ttrig.db')
 
 process.load("CalibMuon.DTCalibration.dtTTrigConstantShiftCorrection_cfi")
 process.dtTTrigConstantShiftCorrection.correctionAlgoConfig.dbLabel = ''
-process.dtTTrigConstantShiftCorrection.correctionAlgoConfig.value = 0.
+process.dtTTrigConstantShiftCorrection.correctionAlgoConfig.value = 20.
 process.dtTTrigConstantShiftCorrection.correctionAlgoConfig.calibChamber = 'All'
 
 process.p = cms.Path(process.dtTTrigConstantShiftCorrection)
