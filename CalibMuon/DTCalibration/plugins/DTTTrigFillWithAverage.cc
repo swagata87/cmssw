@@ -19,9 +19,8 @@ using namespace edm;
 namespace dtCalibration {
 
   DTTTrigFillWithAverage::DTTTrigFillWithAverage(const ParameterSet& pset, edm::ConsumesCollector cc) : foundAverage_(false) {
-    dbLabel = pset.getUntrackedParameter<string>("dbLabel", "");
-    ttrigToken_ = cc.esConsumes(edm::ESInputTag("", pset.getParameter<string>("dbLabel")));
-    dtGeomToken_ = cc.esConsumes();
+    ttrigToken_ = cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
+    dtGeomToken_ = cc.esConsumes<edm::Transition::BeginRun>();
   }
 
   DTTTrigFillWithAverage::~DTTTrigFillWithAverage() {}

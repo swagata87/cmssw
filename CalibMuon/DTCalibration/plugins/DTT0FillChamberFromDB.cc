@@ -24,8 +24,9 @@ using namespace edm;
 
 namespace dtCalibration {
 
-  DTT0FillChamberFromDB::DTT0FillChamberFromDB(const ParameterSet& pset)
-      : dbLabelRef_(pset.getParameter<string>("dbLabelRef")), chamberRef_(pset.getParameter<string>("chamberId")) {
+  DTT0FillChamberFromDB::DTT0FillChamberFromDB(const ParameterSet& pset, edm::ConsumesCollector cc)
+    : chamberRef_(pset.getParameter<string>("chamberId")), t0Token_(cc.esConsumes()), 
+      t0RefToken_(cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getParameter<string>("dbLabelRef")))) {
     //DTChamberId chosenChamberId;
     if (!chamberRef_.empty() && chamberRef_ != "None") {
       stringstream linestr;
@@ -43,13 +44,13 @@ namespace dtCalibration {
   void DTT0FillChamberFromDB::setES(const EventSetup& setup) {
     // Get t0 record from DB
     ESHandle<DTT0> t0H;
-    setup.get<DTT0Rcd>().get(t0H);
+    t0H = setup.getHandle(t0Token_);
     t0Map_ = &*t0H;
     LogVerbatim("Calibration") << "[DTT0FillChamberFromDB] T0 version: " << t0H->version();
 
     // Get reference t0 DB
     ESHandle<DTT0> t0RefH;
-    setup.get<DTT0Rcd>().get(dbLabelRef_, t0RefH);
+    t0RefH = setup.getHandle(t0RefToken_);
     t0MapRef_ = &*t0RefH;
     LogVerbatim("Calibration") << "[DTT0FillChamberFromDB] Reference T0 version: " << t0RefH->version();
   }

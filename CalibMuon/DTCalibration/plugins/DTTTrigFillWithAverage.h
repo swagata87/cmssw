@@ -43,8 +43,6 @@ namespace dtCalibration {
     edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_; 
     edm::ESGetToken<DTGeometry, MuonGeometryRecord> dtGeomToken_;
 
-    std::string dbLabel;
-
     struct {
       float aveMean;
       float rmsMean;

@@ -35,9 +35,8 @@ using namespace edm;
 using namespace std;
 
 DTTTrigCorrection::DTTTrigCorrection(const ParameterSet& pset)
-    : dbLabel_(pset.getUntrackedParameter<string>("dbLabel", "")),
-      correctionAlgo_{DTTTrigCorrectionFactory::get()->create(
-			pset.getParameter<string>("correctionAlgo"), pset.getParameter<ParameterSet>("correctionAlgoConfig"), consumesCollector())  } {
+  : correctionAlgo_{DTTTrigCorrectionFactory::get()->create(
+		    pset.getParameter<string>("correctionAlgo"), pset.getParameter<ParameterSet>("correctionAlgoConfig"), consumesCollector())  } {
   ttrigToken_ = esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
   dtGeomToken_ = esConsumes<edm::Transition::BeginRun>();
   LogVerbatim("Calibration") << "[DTTTrigCorrection] Constructor called" << endl;

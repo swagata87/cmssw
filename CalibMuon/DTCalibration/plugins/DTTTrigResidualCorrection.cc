@@ -48,10 +48,9 @@ namespace dtCalibration {
     rootBaseDir_ = pset.getUntrackedParameter<string>("rootBaseDir", "/DQMData/DT/DTCalibValidation");
     useFit_ = pset.getParameter<bool>("useFitToResiduals");
     //useConstantvDrift_ = pset.getParameter<bool>("useConstantDriftVelocity");
-    dbLabel_ = pset.getUntrackedParameter<string>("dbLabel", "");
     useSlopesCalib_ = pset.getUntrackedParameter<bool>("useSlopesCalib", false);
     readLegacyVDriftDB = pset.getParameter<bool>("readLegacyVDriftDB");
-    ttrigToken_ = cc.esConsumes(edm::ESInputTag("", pset.getParameter<string>("dbLabel")));
+    ttrigToken_ = cc.esConsumes(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
     mTimeMapToken_ = cc.esConsumes();
     vDriftMapToken_ = cc.esConsumes();
 

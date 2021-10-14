@@ -33,9 +33,9 @@ using namespace std;
 using namespace edm;
 
 DTVDriftWriter::DTVDriftWriter(const ParameterSet& pset)
-    : mTimeMapToken_(esConsumes()),
-      vDriftMapToken_(esConsumes()),
-      dtGeomToken_(esConsumes()),
+  : mTimeMapToken_(esConsumes<edm::Transition::BeginRun>()),
+    vDriftMapToken_(esConsumes<edm::Transition::BeginRun>()),
+    dtGeomToken_(esConsumes<edm::Transition::BeginRun>()),
       granularity_(pset.getUntrackedParameter<string>("calibGranularity", "bySL")),
       mTimeMap_(nullptr),
       vDriftMap_(nullptr),

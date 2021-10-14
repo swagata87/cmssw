@@ -43,8 +43,6 @@ namespace dtCalibration {
 
     TFile* rootFile_;
 
-    std::string dbLabel;
-
     const DTTtrig* tTrigMap_;
     edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_;
   };

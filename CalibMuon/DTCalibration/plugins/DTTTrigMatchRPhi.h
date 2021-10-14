@@ -35,7 +35,6 @@ namespace dtCalibration {
 
   private:
     const DTTtrig* tTrigMap_;
-    std::string dbLabel;
     edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_;
   };
 

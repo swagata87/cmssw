@@ -49,7 +49,6 @@ namespace dtCalibration {
 
     std::string rootBaseDir_;
     bool useFit_;
-    std::string dbLabel_;
     bool useSlopesCalib_;
 
     double vDriftEff_[5][14][4][3];

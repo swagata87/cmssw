@@ -41,7 +41,6 @@ public:
 
 protected:
 private:
-  std::string dbLabel_;
 
   const DTTtrig* tTrigMap_;
   edm::ESHandle<DTGeometry> muonGeom_;
