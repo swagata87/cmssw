@@ -79,9 +79,7 @@ DEFINE_EDM_PLUGIN(DTT0CorrectionFactory,
 DEFINE_EDM_PLUGIN(DTT0CorrectionFactory,
                   dtCalibration::DTT0AbsoluteReferenceCorrection,
                   "DTT0AbsoluteReferenceCorrection");
-DEFINE_EDM_PLUGIN(DTT0CorrectionFactory,
-                  dtCalibration::DTT0FEBPathCorrection,
-                  "DTT0FEBPathCorrection");
+DEFINE_EDM_PLUGIN(DTT0CorrectionFactory, dtCalibration::DTT0FEBPathCorrection, "DTT0FEBPathCorrection");
 
 DEFINE_EDM_PLUGIN(DTVDriftPluginFactory, dtCalibration::DTVDriftMeanTimer, "DTVDriftMeanTimer");
 DEFINE_EDM_PLUGIN(DTVDriftPluginFactory, dtCalibration::DTVDriftSegment, "DTVDriftSegment");

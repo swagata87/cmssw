@@ -61,6 +61,5 @@ private:
 
   edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_;
   edm::ESGetToken<DTGeometry, MuonGeometryRecord> dtGeomToken_;
-
 };
 #endif

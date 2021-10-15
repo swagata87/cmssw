@@ -13,11 +13,12 @@
 namespace edm {
   class ParameterSet;
   class ConsumesCollector;
-}
+}  // namespace edm
 namespace dtCalibration {
   class DTTTrigBaseCorrection;
 }
 
-typedef edmplugin::PluginFactory<dtCalibration::DTTTrigBaseCorrection *(const edm::ParameterSet &, edm::ConsumesCollector)>
+typedef edmplugin::PluginFactory<dtCalibration::DTTTrigBaseCorrection *(const edm::ParameterSet &,
+                                                                        edm::ConsumesCollector)>
     DTTTrigCorrectionFactory;
 #endif

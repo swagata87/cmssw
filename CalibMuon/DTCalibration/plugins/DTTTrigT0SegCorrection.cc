@@ -26,7 +26,8 @@ namespace dtCalibration {
   DTTTrigT0SegCorrection::DTTTrigT0SegCorrection(const ParameterSet& pset, edm::ConsumesCollector cc) {
     string t0SegRootFile = pset.getParameter<string>("t0SegRootFile");
     rootFile_ = new TFile(t0SegRootFile.c_str(), "READ");
-    ttrigToken_ = cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
+    ttrigToken_ =
+        cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
   }
 
   DTTTrigT0SegCorrection::~DTTTrigT0SegCorrection() { delete rootFile_; }

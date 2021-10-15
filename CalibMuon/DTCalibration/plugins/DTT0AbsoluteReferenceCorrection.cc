@@ -25,8 +25,9 @@ using namespace edm;
 namespace dtCalibration {
 
   DTT0AbsoluteReferenceCorrection::DTT0AbsoluteReferenceCorrection(const ParameterSet& pset, edm::ConsumesCollector cc)
-    : calibChamber_(pset.getParameter<string>("calibChamber")), reference_(pset.getParameter<double>("reference")), 
-      t0Token_(cc.esConsumes<edm::Transition::BeginRun>()) {
+      : calibChamber_(pset.getParameter<string>("calibChamber")),
+        reference_(pset.getParameter<double>("reference")),
+        t0Token_(cc.esConsumes<edm::Transition::BeginRun>()) {
     //DTChamberId chosenChamberId;
     if (!calibChamber_.empty() && calibChamber_ != "None" && calibChamber_ != "All") {
       stringstream linestr;

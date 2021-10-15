@@ -42,7 +42,6 @@ namespace dtCalibration {
 
     edm::ESGetToken<DTT0, DTT0Rcd> t0Token_;
     edm::ESGetToken<DTT0, DTT0Rcd> t0RefToken_;
-
   };
 
 }  // namespace dtCalibration

@@ -41,7 +41,6 @@ public:
 
 protected:
 private:
-
   const DTTtrig* tTrigMap_;
   edm::ESHandle<DTGeometry> muonGeom_;
 

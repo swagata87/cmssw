@@ -44,7 +44,8 @@ FakeTTrig::FakeTTrig(const ParameterSet& pset) : dataBaseWriteWasDone(false) {
 
   // further configurable smearing
   smearing = pset.getUntrackedParameter<double>("smearing");
-  ttrigToken_ = esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
+  ttrigToken_ =
+      esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
   dtGeomToken_ = esConsumes<edm::Transition::BeginRun>();
   // get random engine
   edm::Service<edm::RandomNumberGenerator> rng;
@@ -58,7 +59,7 @@ FakeTTrig::~FakeTTrig() { cout << "[FakeTTrig] Destructor called! " << endl; }
 
 void FakeTTrig::beginRun(const edm::Run&, const EventSetup& setup) {
   cout << "[FakeTTrig] entered into beginRun! " << endl;
-  muonGeom = setup.getHandle(dtGeomToken_); 
+  muonGeom = setup.getHandle(dtGeomToken_);
 
   // Get the tTrig reference map
   if (ps.getUntrackedParameter<bool>("readDB", true))

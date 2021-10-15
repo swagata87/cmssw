@@ -47,9 +47,9 @@ namespace dtCalibration {
     TFile* rootFile_;
     DTResidualFitter* fitter_;
 
-    //    const 
+    //    const
     edm::ESGetToken<DTMtime, DTMtimeRcd> mTimeMapToken_;
-    // const 
+    // const
     edm::ESGetToken<DTRecoConditions, DTRecoConditionsVdriftRcd> vDriftMapToken_;
   };
 

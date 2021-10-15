@@ -42,7 +42,7 @@ void DTVDriftAnalyzer::beginRun(const edm::Run& run, const edm::EventSetup& even
     vDriftMap_ = nullptr;
     edm::LogVerbatim("DTVDriftAnalyzer") << "[DTVDriftAnalyzer] MTime version: " << mTime->version() << endl;
   } else {
-    ESHandle<DTRecoConditions> hVdrift;   
+    ESHandle<DTRecoConditions> hVdrift;
     hVdrift = eventSetup.getHandle(vDriftMapToken_);
     vDriftMap_ = &*hVdrift;
     mTimeMap = nullptr;

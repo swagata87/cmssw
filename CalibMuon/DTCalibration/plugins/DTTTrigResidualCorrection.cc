@@ -50,7 +50,8 @@ namespace dtCalibration {
     //useConstantvDrift_ = pset.getParameter<bool>("useConstantDriftVelocity");
     useSlopesCalib_ = pset.getUntrackedParameter<bool>("useSlopesCalib", false);
     readLegacyVDriftDB = pset.getParameter<bool>("readLegacyVDriftDB");
-    ttrigToken_ = cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
+    ttrigToken_ =
+        cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
     mTimeMapToken_ = cc.esConsumes<edm::Transition::BeginRun>();
     vDriftMapToken_ = cc.esConsumes<edm::Transition::BeginRun>();
 

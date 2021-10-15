@@ -41,7 +41,6 @@ private:
   double maxAnglePhi_;
   double maxAngleZ_;
   edm::ESGetToken<DTStatusFlag, DTStatusFlagRcd> theStatusMapToken_;
-
 };
 
 #endif

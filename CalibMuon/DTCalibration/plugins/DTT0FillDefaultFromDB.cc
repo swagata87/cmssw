@@ -20,8 +20,9 @@ using namespace edm;
 namespace dtCalibration {
 
   DTT0FillDefaultFromDB::DTT0FillDefaultFromDB(const ParameterSet& pset, edm::ConsumesCollector cc)
-    : t0Token_(cc.esConsumes<edm::Transition::BeginRun>()),
-      t0RefToken_(cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getParameter<string>("dbLabelRef")))){}
+      : t0Token_(cc.esConsumes<edm::Transition::BeginRun>()),
+        t0RefToken_(
+            cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getParameter<string>("dbLabelRef")))) {}
 
   DTT0FillDefaultFromDB::~DTT0FillDefaultFromDB() {}
 

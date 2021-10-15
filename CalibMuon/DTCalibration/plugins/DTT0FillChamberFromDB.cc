@@ -25,9 +25,10 @@ using namespace edm;
 namespace dtCalibration {
 
   DTT0FillChamberFromDB::DTT0FillChamberFromDB(const ParameterSet& pset, edm::ConsumesCollector cc)
-    : chamberRef_(pset.getParameter<string>("chamberId")), 
-      t0Token_(cc.esConsumes<edm::Transition::BeginRun>()), 
-      t0RefToken_(cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getParameter<string>("dbLabelRef")))) {
+      : chamberRef_(pset.getParameter<string>("chamberId")),
+        t0Token_(cc.esConsumes<edm::Transition::BeginRun>()),
+        t0RefToken_(
+            cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getParameter<string>("dbLabelRef")))) {
     //DTChamberId chosenChamberId;
     if (!chamberRef_.empty() && chamberRef_ != "None") {
       stringstream linestr;

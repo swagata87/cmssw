@@ -17,7 +17,7 @@
 namespace edm {
   class ParameterSet;
   class ConsumesCollector;
-}
+}  // namespace edm
 
 class DTTtrig;
 

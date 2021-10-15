@@ -26,7 +26,8 @@ DTTTrigAnalyzer::DTTTrigAnalyzer(const ParameterSet &pset) {
   theFile->cd();
   //The k factor to compute ttrig
   //kfactor = pset.getUntrackedParameter<double>("kfactor",0);
-  ttrigToken_ = esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel"))) ;
+  ttrigToken_ =
+      esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
 }
 
 DTTTrigAnalyzer::~DTTTrigAnalyzer() { theFile->Close(); }

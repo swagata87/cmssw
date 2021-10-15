@@ -26,9 +26,11 @@ using namespace edm;
 
 namespace dtCalibration {
 
-  DTT0WireInChamberReferenceCorrection::DTT0WireInChamberReferenceCorrection(const ParameterSet& pset, edm::ConsumesCollector cc)
-    : calibChamber_(pset.getParameter<string>("calibChamber")), t0Token_(cc.esConsumes<edm::Transition::BeginRun>()), 
-      dtGeomToken_(cc.esConsumes<edm::Transition::BeginRun>())  {
+  DTT0WireInChamberReferenceCorrection::DTT0WireInChamberReferenceCorrection(const ParameterSet& pset,
+                                                                             edm::ConsumesCollector cc)
+      : calibChamber_(pset.getParameter<string>("calibChamber")),
+        t0Token_(cc.esConsumes<edm::Transition::BeginRun>()),
+        dtGeomToken_(cc.esConsumes<edm::Transition::BeginRun>()) {
     //DTChamberId chosenChamberId;
     if (!calibChamber_.empty() && calibChamber_ != "None" && calibChamber_ != "All") {
       stringstream linestr;

@@ -22,9 +22,9 @@ using namespace edm;
 namespace dtCalibration {
 
   DTTTrigConstantShift::DTTTrigConstantShift(const ParameterSet& pset, edm::ConsumesCollector cc)
-      : calibChamber_(pset.getParameter<string>("calibChamber")),
-        value_(pset.getParameter<double>("value")) {
-    ttrigToken_ = cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel"))) ;
+      : calibChamber_(pset.getParameter<string>("calibChamber")), value_(pset.getParameter<double>("value")) {
+    ttrigToken_ =
+        cc.esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
     LogVerbatim("Calibration") << "[DTTTrigConstantShift] Applying constant correction value: " << value_ << endl;
 
     if (!calibChamber_.empty() && calibChamber_ != "None" && calibChamber_ != "All") {

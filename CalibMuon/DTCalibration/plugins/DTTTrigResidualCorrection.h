@@ -63,7 +63,6 @@ namespace dtCalibration {
     edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_;
     edm::ESGetToken<DTMtime, DTMtimeRcd> mTimeMapToken_;
     edm::ESGetToken<DTRecoConditions, DTRecoConditionsVdriftRcd> vDriftMapToken_;
-
   };
 
 }  // namespace dtCalibration

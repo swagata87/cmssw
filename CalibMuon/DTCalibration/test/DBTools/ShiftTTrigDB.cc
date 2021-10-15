@@ -31,7 +31,8 @@ ShiftTTrigDB::ShiftTTrigDB(const ParameterSet& pset) {
   //Read the chambers to be shifted
   vector<ParameterSet> parameters = pset.getParameter<vector<ParameterSet> >("chambers");
   //  dbLabel = pset.getUntrackedParameter<string>("dbLabel", "");
-  ttrigToken_ = esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
+  ttrigToken_ =
+      esConsumes<edm::Transition::BeginRun>(edm::ESInputTag("", pset.getUntrackedParameter<string>("dbLabel")));
   dtGeomToken_ = esConsumes<edm::Transition::BeginRun>();
 
   int counter = 0;

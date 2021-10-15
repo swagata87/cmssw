@@ -64,7 +64,7 @@ private:
 
   bool readDB_;
   int defaultTtrig_;
- 
+
   std::vector<DTWireId> wireIdWithHisto_;
   unsigned int lumiMax_;
 

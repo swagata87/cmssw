@@ -20,8 +20,7 @@ DTSegmentSelector::DTSegmentSelector(edm::ParameterSet const& pset, edm::Consume
       minHitsZ_(pset.getParameter<int>("minHitsZ")),
       maxChi2_(pset.getParameter<double>("maxChi2")),
       maxAnglePhi_(pset.getParameter<double>("maxAnglePhi")),
-      maxAngleZ_(pset.getParameter<double>("maxAngleZ")) 
-{
+      maxAngleZ_(pset.getParameter<double>("maxAngleZ")) {
   muonToken_ = iC.consumes<reco::MuonCollection>(muonTags_);
   theStatusMapToken_ = iC.esConsumes();
 }

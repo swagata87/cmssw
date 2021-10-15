@@ -40,7 +40,7 @@ namespace dtCalibration {
     const DTTtrig* tTrigMap_;
     edm::ESHandle<DTGeometry> muonGeom_;
 
-    edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_; 
+    edm::ESGetToken<DTTtrig, DTTtrigRcd> ttrigToken_;
     edm::ESGetToken<DTGeometry, MuonGeometryRecord> dtGeomToken_;
 
     struct {
