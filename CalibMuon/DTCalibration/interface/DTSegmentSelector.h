@@ -40,7 +40,7 @@ private:
   double maxChi2_;
   double maxAnglePhi_;
   double maxAngleZ_;
-  edm::ESGetToken<DTStatusFlag, DTStatusFlagRcd> theStatusMapToken;
+  edm::ESGetToken<DTStatusFlag, DTStatusFlagRcd> theStatusMapToken_;
 
 };
 
