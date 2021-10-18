@@ -36,14 +36,12 @@ DTVDriftAnalyzer::~DTVDriftAnalyzer() { theFile->Close(); }
 
 void DTVDriftAnalyzer::beginRun(const edm::Run& run, const edm::EventSetup& eventSetup) {
   if (readLegacyVDriftDB) {
-    ESHandle<DTMtime> mTime;
-    mTime = eventSetup.getHandle(mTimeMapToken_);
+    ESHandle<DTMtime> mTime = eventSetup.getHandle(mTimeMapToken_);
     mTimeMap = &*mTime;
     vDriftMap_ = nullptr;
     edm::LogVerbatim("DTVDriftAnalyzer") << "[DTVDriftAnalyzer] MTime version: " << mTime->version() << endl;
   } else {
-    ESHandle<DTRecoConditions> hVdrift;
-    hVdrift = eventSetup.getHandle(vDriftMapToken_);
+    ESHandle<DTRecoConditions> hVdrift = eventSetup.getHandle(vDriftMapToken_);
     vDriftMap_ = &*hVdrift;
     mTimeMap = nullptr;
     // Consistency check: no parametrization is implemented for the time being

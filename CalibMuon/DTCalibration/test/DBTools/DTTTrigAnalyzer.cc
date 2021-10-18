@@ -33,8 +33,7 @@ DTTTrigAnalyzer::DTTTrigAnalyzer(const ParameterSet &pset) {
 DTTTrigAnalyzer::~DTTTrigAnalyzer() { theFile->Close(); }
 
 void DTTTrigAnalyzer::beginRun(const edm::Run &, const edm::EventSetup &eventSetup) {
-  ESHandle<DTTtrig> tTrig;
-  tTrig = eventSetup.getHandle(ttrigToken_);
+  ESHandle<DTTtrig> tTrig = eventSetup.getHandle(ttrigToken_);
   tTrigMap = &*tTrig;
   cout << "[DTTTrigAnalyzer] TTrig version: " << tTrig->version() << endl;
 }

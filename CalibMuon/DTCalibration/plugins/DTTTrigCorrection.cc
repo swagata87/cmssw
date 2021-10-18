@@ -50,8 +50,7 @@ DTTTrigCorrection::~DTTTrigCorrection() {
 
 void DTTTrigCorrection::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
   // Get tTrig record from DB
-  ESHandle<DTTtrig> tTrig;
-  tTrig = setup.getHandle(ttrigToken_);
+  ESHandle<DTTtrig> tTrig = setup.getHandle(ttrigToken_);
   tTrigMap_ = &*tTrig;
   LogVerbatim("Calibration") << "[DTTTrigCorrection]: TTrig version: " << tTrig->version() << endl;
 

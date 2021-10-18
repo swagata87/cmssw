@@ -330,8 +330,7 @@ vector<int> DumpFileToDB::readChannelsMap(stringstream& linestr) {
 void DumpFileToDB::beginRun(const edm::Run& run, const edm::EventSetup& setup) {
   if (diffMode) {
     if (dbToDump == "TTrigDB") {  // read the original DB
-      ESHandle<DTTtrig> tTrig;
-      tTrig = setup.getHandle(ttrigToken_);
+      ESHandle<DTTtrig> tTrig = setup.getHandle(ttrigToken_);
       tTrigMapOrig = &*tTrig;
       cout << "[DumpDBToFile] TTrig version: " << tTrig->version() << endl;
     }

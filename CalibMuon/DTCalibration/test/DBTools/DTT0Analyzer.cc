@@ -33,8 +33,7 @@ DTT0Analyzer::~DTT0Analyzer() { theFile->Close(); }
 
 void DTT0Analyzer::beginRun(const edm::Run&, const edm::EventSetup& eventSetup) {
   //Get the t0 map from the DB
-  ESHandle<DTT0> t0;
-  t0 = eventSetup.getHandle(t0Token_);
+  ESHandle<DTT0> t0 = eventSetup.getHandle(t0Token_);
   tZeroMap = &*t0;
 
   // Get the DT Geometry

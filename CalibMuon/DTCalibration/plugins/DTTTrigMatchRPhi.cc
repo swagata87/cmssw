@@ -28,8 +28,7 @@ namespace dtCalibration {
 
   void DTTTrigMatchRPhi::setES(const EventSetup& setup) {
     // Get tTrig record from DB
-    ESHandle<DTTtrig> tTrig;
-    tTrig = setup.getHandle(ttrigToken_);
+    ESHandle<DTTtrig> tTrig = setup.getHandle(ttrigToken_);
     tTrigMap_ = &*tTrig;
   }
 

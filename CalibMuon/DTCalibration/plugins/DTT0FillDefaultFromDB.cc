@@ -28,14 +28,12 @@ namespace dtCalibration {
 
   void DTT0FillDefaultFromDB::setES(const EventSetup& setup) {
     // Get t0 record from DB
-    ESHandle<DTT0> t0H;
-    t0H = setup.getHandle(t0Token_);
+    ESHandle<DTT0> t0H = setup.getHandle(t0Token_);
     t0Map_ = &*t0H;
     LogVerbatim("Calibration") << "[DTT0FillDefaultFromDB] T0 version: " << t0H->version();
 
     // Get reference t0 DB
-    ESHandle<DTT0> t0RefH;
-    t0RefH = setup.getHandle(t0RefToken_);
+    ESHandle<DTT0> t0RefH = setup.getHandle(t0RefToken_);
     t0MapRef_ = &*t0RefH;
     LogVerbatim("Calibration") << "[DTT0FillDefaultFromDB] Reference T0 version: " << t0RefH->version();
   }

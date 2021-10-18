@@ -43,8 +43,6 @@ private:
   const DTTtrig* tTrigMap;
   edm::ESHandle<DTGeometry> muonGeom;
 
-  //  std::string dbLabel;
-
   std::vector<std::vector<int> > chambers;
   std::vector<double> shifts;
   std::map<std::vector<int>, double> mapShiftsByChamber;

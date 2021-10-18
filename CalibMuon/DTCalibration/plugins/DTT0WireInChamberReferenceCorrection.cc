@@ -48,8 +48,7 @@ namespace dtCalibration {
 
   void DTT0WireInChamberReferenceCorrection::setES(const EventSetup& setup) {
     // Get t0 record from DB
-    ESHandle<DTT0> t0H;
-    t0H = setup.getHandle(t0Token_);
+    ESHandle<DTT0> t0H = setup.getHandle(t0Token_);
     t0Map_ = &*t0H;
     LogVerbatim("Calibration") << "[DTT0WireInChamberReferenceCorrection] T0 version: " << t0H->version();
 
