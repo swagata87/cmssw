@@ -136,8 +136,13 @@ void CAHitNtupletGeneratorKernelsGPU::launchKernels(HitsOnCPU const &hh, TkSoA *
   // device_isOuterHitOfCell_.reset();
 }
 
+//probably I shouldn't touch this file.. but things are not compiling otherwise
 template <>
-void CAHitNtupletGeneratorKernelsGPU::buildDoublets(HitsOnCPU const &hh, cudaStream_t stream) {
+std::vector<GPUCACell> CAHitNtupletGeneratorKernelsGPU::buildDoublets(HitsOnCPU const &hh, cudaStream_t stream) {
+
+  std::vector<GPUCACell> myDoublets;
+  myDoublets.clear();
+
   int32_t nhits = hh.nHits();
 
 #ifdef NTUPLE_DEBUG
@@ -182,7 +187,7 @@ void CAHitNtupletGeneratorKernelsGPU::buildDoublets(HitsOnCPU const &hh, cudaStr
 #endif
 
   if (0 == nhits)
-    return;  // protect against empty events
+    return myDoublets;  // protect against empty events
 
   // take all layer pairs into account
   auto nActualPairs = gpuPixelDoublets::nPairs;
@@ -214,6 +219,16 @@ void CAHitNtupletGeneratorKernelsGPU::buildDoublets(HitsOnCPU const &hh, cudaStr
                                                                     params_.doPtCut_,
                                                                     params_.maxNumberOfDoublets_);
   cudaCheck(cudaGetLastError());
+
+  myDoublets.reserve(params_.maxNumberOfDoublets_);
+//  for (unsigned int i=0; i<params_.maxNumberOfDoublets_; i++) {
+  //  if ( device_theCells_.get()[i].layerPairId() > 0 ) 
+    ////////// error: calling a __device__ function("layerPairId") from a __host__ function("buildDoublets") is not allowed
+    //  {
+      //  myDoublets.push_back(device_theCells_.get()[i]);
+      //}
+  //}
+  return myDoublets;
 
 #ifdef GPU_DEBUG
   cudaDeviceSynchronize();

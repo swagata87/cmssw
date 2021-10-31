@@ -187,7 +187,7 @@ public:
 
   void fillHitDetIndices(HitsView const* hv, TkSoA* tuples_d, cudaStream_t cudaStream);
 
-  void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream);
+  std::vector<GPUCACell> buildDoublets(HitsOnCPU const& hh, cudaStream_t stream);
   void allocateOnGPU(int32_t nHits, cudaStream_t stream);
   void cleanup(cudaStream_t cudaStream);
 

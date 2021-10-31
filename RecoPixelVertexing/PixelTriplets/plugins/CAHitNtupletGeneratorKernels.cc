@@ -11,7 +11,11 @@ void CAHitNtupletGeneratorKernelsCPU::fillHitDetIndices(HitsView const *hv, TkSo
 }
 
 template <>
-void CAHitNtupletGeneratorKernelsCPU::buildDoublets(HitsOnCPU const &hh, cudaStream_t stream) {
+std::vector<GPUCACell> CAHitNtupletGeneratorKernelsCPU::buildDoublets(HitsOnCPU const &hh, cudaStream_t stream) {
+
+  std::vector<GPUCACell> myDoublets;
+  myDoublets.clear();
+
   auto nhits = hh.nHits();
 
 #ifdef NTUPLE_DEBUG
@@ -45,7 +49,7 @@ void CAHitNtupletGeneratorKernelsCPU::buildDoublets(HitsOnCPU const &hh, cudaStr
   //device_theCells_ = Traits::template make_unique<GPUCACell[]>(params_.maxNumberOfDoublets_, stream);
   device_theCells_ = std::make_unique<GPUCACell[]>(params_.maxNumberOfDoublets_);
   if (0 == nhits)
-    return;  // protect against empty events
+    return myDoublets;  // protect against empty events
 
   // take all layer pairs into account
   auto nActualPairs = gpuPixelDoublets::nPairs;
@@ -71,6 +75,16 @@ void CAHitNtupletGeneratorKernelsCPU::buildDoublets(HitsOnCPU const &hh, cudaStr
                                          params_.doZ0Cut_,
                                          params_.doPtCut_,
                                          params_.maxNumberOfDoublets_);
+
+  myDoublets.reserve(params_.maxNumberOfDoublets_);
+
+  for (unsigned int i=0; i<params_.maxNumberOfDoublets_; i++) {
+    if ( device_theCells_.get()[i].layerPairId() > 0 )
+      {
+	myDoublets.push_back(device_theCells_.get()[i]);
+      }
+  }
+  return myDoublets;
 }
 
 template <>

@@ -48,7 +48,12 @@ public:
 
   PixelTrackHeterogeneous makeTuplesAsync(TrackingRecHit2DGPU const& hits_d, float bfield, cudaStream_t stream) const;
 
-  PixelTrackHeterogeneous makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const;
+  struct returnVals {  // Declaring a struct to return multiple values from makeTuples   
+    PixelTrackHeterogeneous tracks;
+    std::vector<GPUCACell> myDoublets;
+  };
+
+  returnVals makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const;
 
 private:
   void buildDoublets(HitsOnCPU const& hh, cudaStream_t stream) const;

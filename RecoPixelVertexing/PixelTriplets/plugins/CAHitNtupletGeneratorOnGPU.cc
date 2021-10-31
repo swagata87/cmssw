@@ -214,7 +214,8 @@ PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecH
   return tracks;
 }
 
-PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
+CAHitNtupletGeneratorOnGPU::returnVals CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DCPU const& hits_d, float bfield) const {
+
   PixelTrackHeterogeneous tracks(std::make_unique<pixelTrack::TrackSoA>());
 
   auto* soa = tracks.get();
@@ -224,12 +225,14 @@ PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DC
   kernels.setCounters(m_counters);
   kernels.allocateOnGPU(hits_d.nHits(), nullptr);
 
-  kernels.buildDoublets(hits_d, nullptr);
+  auto myDoublets = kernels.buildDoublets(hits_d, nullptr);
   kernels.launchKernels(hits_d, soa, nullptr);
   kernels.fillHitDetIndices(hits_d.view(), soa, nullptr);  // in principle needed only if Hits not "available"
 
+  returnVals thisVal;
+
   if (0 == hits_d.nHits())
-    return tracks;
+    return {thisVal.tracks,thisVal.myDoublets}; 
 
   // now fit
   HelixFitOnGPU fitter(bfield, m_params.fit5as4_);
@@ -247,5 +250,8 @@ PixelTrackHeterogeneous CAHitNtupletGeneratorOnGPU::makeTuples(TrackingRecHit2DC
   std::cout << "finished building pixel tracks on CPU" << std::endl;
 #endif
 
-  return tracks;
+  returnVals finalVal;
+  return {finalVal.tracks,finalVal.myDoublets};
+  //here I'm getting this error: 
+  //error: use of deleted function 'HeterogeneousSoA<TrackSoAHeterogeneousT<32768> >::HeterogeneousSoA(const HeterogeneousSoA<TrackSoAHeterogeneousT<32768> >&)'
 }

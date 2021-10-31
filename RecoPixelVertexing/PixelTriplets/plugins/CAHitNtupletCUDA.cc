@@ -38,6 +38,8 @@ private:
   edm::EDPutTokenT<cms::cuda::Product<PixelTrackHeterogeneous>> tokenTrackGPU_;
   edm::EDGetTokenT<TrackingRecHit2DCPU> tokenHitCPU_;
   edm::EDPutTokenT<PixelTrackHeterogeneous> tokenTrackCPU_;
+  //this is the plan if the step before works                                                                                                                       
+  //  edm::EDPutTokenT<std::vector<GPUCACell>> tokenDoubletCPU_;
 
   CAHitNtupletGeneratorOnGPU gpuAlgo_;
 };
@@ -51,6 +53,8 @@ CAHitNtupletCUDA::CAHitNtupletCUDA(const edm::ParameterSet& iConfig)
   } else {
     tokenHitCPU_ = consumes<TrackingRecHit2DCPU>(iConfig.getParameter<edm::InputTag>("pixelRecHitSrc"));
     tokenTrackCPU_ = produces<PixelTrackHeterogeneous>();
+    //this is the plan if the step before works
+    //    tokenDoubletCPU_ = produces<std::vector<GPUCACell>>();
   }
 }
 
@@ -76,7 +80,9 @@ void CAHitNtupletCUDA::produce(edm::StreamID streamID, edm::Event& iEvent, const
     ctx.emplace(iEvent, tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, ctx.stream()));
   } else {
     auto const& hits = iEvent.get(tokenHitCPU_);
-    iEvent.emplace(tokenTrackCPU_, gpuAlgo_.makeTuples(hits, bf));
+    iEvent.emplace(tokenTrackCPU_, gpuAlgo_.makeTuples(hits, bf).tracks);
+    //this is the plan if the step before works
+    //iEvent.emplace(tokenTrackCPU_, gpuAlgo_.makeTuples(hits, bf).myDoublets); 
   }
 }
 
