@@ -38,6 +38,9 @@ private:
   const EgammaHcalIsolation::arrayHB eThresHB_;
   const EgammaHcalIsolation::arrayHE eThresHE_;
 
+  bool skipHCAL_;
+  bool skipECAL_;
+
   const edm::ESGetToken<EcalPFRecHitThresholds, EcalPFRecHitThresholdsRcd> ecalPFRechitThresholdsToken_;
   const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometryToken_;
 };
@@ -51,6 +54,8 @@ FixedGridRhoProducerFastjetFromRecHit::FixedGridRhoProducerFastjetFromRecHit(con
   ecalRecHitsTag2_(consumes(iConfig.getParameter<edm::InputTag>("ecalRecHitsTag2"))),
   eThresHB_(iConfig.getParameter<EgammaHcalIsolation::arrayHB>("eThresHB")),
   eThresHE_(iConfig.getParameter<EgammaHcalIsolation::arrayHE>("eThresHE")),
+  skipHCAL_(iConfig.getParameter<bool>("skipHCAL")),
+  skipECAL_(iConfig.getParameter<bool>("skipECAL")),
   ecalPFRechitThresholdsToken_{esConsumes()},
   caloGeometryToken_{esConsumes()} {
   produces<double>();
@@ -63,33 +68,42 @@ void FixedGridRhoProducerFastjetFromRecHit::produce(edm::Event& iEvent, const ed
   std::vector<fastjet::PseudoJet> inputs;
   auto const& thresholds = iSetup.getData(ecalPFRechitThresholdsToken_);
 
-  for (const auto &hit : iEvent.get(hbheRecHitsTag1_) ) {
-    if (passedHcalNoiseCut(hit) ) {
-      TLorentzVector hitp4(0,0,0,0);
-      getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
-      inputs.push_back(fastjet::PseudoJet(hitp4.Px(), hitp4.Py(), hitp4.Pz(), hitp4.E()));
+  if (skipHCAL_ && skipECAL_) {
+    throw cms::Exception("FixedGridRhoProducerFastjetFromRecHit")
+      << "skipHCAL and skipECAL both can't be True. Make at least one of them False.";
+  }
+
+  if ( !skipHCAL_ ) {
+    for (const auto &hit : iEvent.get(hbheRecHitsTag1_) ) {
+      if (passedHcalNoiseCut(hit) ) {
+	TLorentzVector hitp4(0,0,0,0);
+	getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
+	inputs.push_back(fastjet::PseudoJet(hitp4.Px(), hitp4.Py(), hitp4.Pz(), hitp4.E()));
+      }
     }
   }
 
-  for (const auto &hit : iEvent.get(ecalRecHitsTag1_) ) {
-    if ( passedEcalNoiseCut(hit, &thresholds) ) {
-      TLorentzVector hitp4(0,0,0,0);
-      getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
-      inputs.push_back(fastjet::PseudoJet(hitp4.Px(), hitp4.Py(), hitp4.Pz(), hitp4.E()));
+  if ( !skipECAL_ ) {
+    for (const auto &hit : iEvent.get(ecalRecHitsTag1_) ) {
+      if ( passedEcalNoiseCut(hit, &thresholds) ) {
+	TLorentzVector hitp4(0,0,0,0);
+	getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
+	inputs.push_back(fastjet::PseudoJet(hitp4.Px(), hitp4.Py(), hitp4.Pz(), hitp4.E()));
+      }
     }
-  }
-
-  for (const auto &hit : iEvent.get(ecalRecHitsTag2_) ) {
-    if ( passedEcalNoiseCut(hit, &thresholds) ) {
-      TLorentzVector hitp4(0,0,0,0);
-      getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
-      inputs.push_back(fastjet::PseudoJet(hitp4.Px(), hitp4.Py(), hitp4.Pz(), hitp4.E()));
+  
+    for (const auto &hit : iEvent.get(ecalRecHitsTag2_) ) {
+      if ( passedEcalNoiseCut(hit, &thresholds) ) {
+	TLorentzVector hitp4(0,0,0,0);
+	getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
+	inputs.push_back(fastjet::PseudoJet(hitp4.Px(), hitp4.Py(), hitp4.Pz(), hitp4.E()));
+      }
     }
   }
 
   bge_.set_particles(inputs);
   iEvent.put(std::make_unique<double>(bge_.rho()));
-  std::cout << "new rho from pf clusters " << bge_.rho() << std::endl;
+  std::cout << "new rho from recHits " << bge_.rho() << std::endl;
 }
 
 void FixedGridRhoProducerFastjetFromRecHit::getHitP4(const DetId &detId, float hitE, TLorentzVector &hitp4, const CaloGeometry &caloGeometry) {
