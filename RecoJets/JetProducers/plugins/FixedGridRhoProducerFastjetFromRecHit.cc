@@ -6,13 +6,10 @@
 #include "DataFormats/Common/interface/View.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
-//#include "DataFormats/ParticleFlowReco/interface/PFCluster.h"
-//#include "DataFormats/ParticleFlowReco/interface/PFClusterFwd.h"
 #include "TLorentzVector.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
-//#include <Math/VectorUtil.h>
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 #include "RecoEgamma/EgammaIsolationAlgos/interface/EgammaHcalIsolation.h"
@@ -31,9 +28,9 @@ private:
   bool passedEcalNoiseCut(const EcalRecHit &hit,const EcalPFRecHitThresholds *thresholds) ;
 
   fastjet::GridMedianBackgroundEstimator bge_;
-  edm::EDGetTokenT<HBHERecHitCollection> hbheRecHitsTag1_;
-  edm::EDGetTokenT<EcalRecHitCollection> ecalRecHitsTag1_;
-  edm::EDGetTokenT<EcalRecHitCollection> ecalRecHitsTag2_;
+  edm::EDGetTokenT<HBHERecHitCollection> hbheRecHitsTag_;
+  edm::EDGetTokenT<EcalRecHitCollection> ebRecHitsTag_;
+  edm::EDGetTokenT<EcalRecHitCollection> eeRecHitsTag_;
 
   const EgammaHcalIsolation::arrayHB eThresHB_;
   const EgammaHcalIsolation::arrayHE eThresHE_;
@@ -45,13 +42,13 @@ private:
   const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometryToken_;
 };
 
-using namespace std;
+//using namespace std;
 
 FixedGridRhoProducerFastjetFromRecHit::FixedGridRhoProducerFastjetFromRecHit(const edm::ParameterSet& iConfig) : 
   bge_(iConfig.getParameter<double>("maxRapidity"), iConfig.getParameter<double>("gridSpacing")), 
-  hbheRecHitsTag1_(consumes(iConfig.getParameter<edm::InputTag>("hbheRecHitsTag1"))),
-  ecalRecHitsTag1_(consumes(iConfig.getParameter<edm::InputTag>("ecalRecHitsTag1"))),
-  ecalRecHitsTag2_(consumes(iConfig.getParameter<edm::InputTag>("ecalRecHitsTag2"))),
+  hbheRecHitsTag_(consumes(iConfig.getParameter<edm::InputTag>("hbheRecHitsTag"))),
+  ebRecHitsTag_(consumes(iConfig.getParameter<edm::InputTag>("ebRecHitsTag"))),
+  eeRecHitsTag_(consumes(iConfig.getParameter<edm::InputTag>("eeRecHitsTag"))),
   eThresHB_(iConfig.getParameter<EgammaHcalIsolation::arrayHB>("eThresHB")),
   eThresHE_(iConfig.getParameter<EgammaHcalIsolation::arrayHE>("eThresHE")),
   skipHCAL_(iConfig.getParameter<bool>("skipHCAL")),
@@ -74,7 +71,7 @@ void FixedGridRhoProducerFastjetFromRecHit::produce(edm::Event& iEvent, const ed
   }
 
   if ( !skipHCAL_ ) {
-    for (const auto &hit : iEvent.get(hbheRecHitsTag1_) ) {
+    for (const auto &hit : iEvent.get(hbheRecHitsTag_) ) {
       if (passedHcalNoiseCut(hit) ) {
 	TLorentzVector hitp4(0,0,0,0);
 	getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
@@ -84,7 +81,7 @@ void FixedGridRhoProducerFastjetFromRecHit::produce(edm::Event& iEvent, const ed
   }
 
   if ( !skipECAL_ ) {
-    for (const auto &hit : iEvent.get(ecalRecHitsTag1_) ) {
+    for (const auto &hit : iEvent.get(ebRecHitsTag_) ) {
       if ( passedEcalNoiseCut(hit, &thresholds) ) {
 	TLorentzVector hitp4(0,0,0,0);
 	getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
@@ -92,7 +89,7 @@ void FixedGridRhoProducerFastjetFromRecHit::produce(edm::Event& iEvent, const ed
       }
     }
   
-    for (const auto &hit : iEvent.get(ecalRecHitsTag2_) ) {
+    for (const auto &hit : iEvent.get(eeRecHitsTag_) ) {
       if ( passedEcalNoiseCut(hit, &thresholds) ) {
 	TLorentzVector hitp4(0,0,0,0);
 	getHitP4(hit.id(), hit.energy(), hitp4, iSetup.getData(caloGeometryToken_)) ;
@@ -111,7 +108,8 @@ void FixedGridRhoProducerFastjetFromRecHit::getHitP4(const DetId &detId, float h
   const CaloSubdetectorGeometry* subDetGeom = caloGeometry.getSubdetectorGeometry(detId);
   std::shared_ptr<const CaloCellGeometry> cellGeom = subDetGeom!=nullptr ? subDetGeom->getGeometry(detId) : std::shared_ptr<const CaloCellGeometry>();
   if(cellGeom!=nullptr){
-    const GlobalPoint &gpPos =cellGeom->getPosition();
+    // use repPos() from cached memory instead of getPosition() to save CPU time
+    const auto &gpPos = cellGeom->repPos();
     double thispt=hitE/cosh(gpPos.eta());
     hitp4.SetPtEtaPhiE(thispt,gpPos.eta(),gpPos.phi(),hitE);
   }else{
