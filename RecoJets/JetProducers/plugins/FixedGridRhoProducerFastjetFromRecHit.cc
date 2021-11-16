@@ -20,6 +20,7 @@ class FixedGridRhoProducerFastjetFromRecHit : public edm::stream::EDProducer<> {
 public:
   explicit FixedGridRhoProducerFastjetFromRecHit(const edm::ParameterSet& iConfig);
   ~FixedGridRhoProducerFastjetFromRecHit() override;
+  static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
   void produce(edm::Event&, const edm::EventSetup&) override;
@@ -42,8 +43,6 @@ private:
   const edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometryToken_;
 };
 
-//using namespace std;
-
 FixedGridRhoProducerFastjetFromRecHit::FixedGridRhoProducerFastjetFromRecHit(const edm::ParameterSet& iConfig) : 
   bge_(iConfig.getParameter<double>("maxRapidity"), iConfig.getParameter<double>("gridSpacing")), 
   hbheRecHitsTag_(consumes(iConfig.getParameter<edm::InputTag>("hbheRecHitsTag"))),
@@ -56,6 +55,21 @@ FixedGridRhoProducerFastjetFromRecHit::FixedGridRhoProducerFastjetFromRecHit(con
   ecalPFRechitThresholdsToken_{esConsumes()},
   caloGeometryToken_{esConsumes()} {
   produces<double>();
+}
+
+void FixedGridRhoProducerFastjetFromRecHit::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+  edm::ParameterSetDescription desc;
+  desc.add<edm::InputTag>(("hbheRecHitsTag"), edm::InputTag("hltHbhereco"));
+  desc.add<edm::InputTag>(("ebRecHitsTag"), edm::InputTag("hltEcalRecHit","EcalRecHitsEB"));
+  desc.add<edm::InputTag>(("eeRecHitsTag"), edm::InputTag("hltEcalRecHit","EcalRecHitsEE"));
+  desc.add<bool>(("skipHCAL"), false);
+  desc.add<bool>(("skipECAL"), false);
+  //eThresHB/HE are from RecoParticleFlow/PFClusterProducer/python/particleFlowRecHitHBHE_cfi.py
+  desc.add<std::vector<double> >("eThresHB", {0.1, 0.2, 0.3, 0.3});
+  desc.add<std::vector<double> >("eThresHE", {0.1, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2});
+  desc.add<double>("maxRapidity", 2.5);
+  desc.add<double>("gridSpacing", 0.55);
+  descriptions.add("hltFixedGridRhoProducerFastjetFromRecHit", desc);
 }
 
 FixedGridRhoProducerFastjetFromRecHit::~FixedGridRhoProducerFastjetFromRecHit() {}
@@ -108,13 +122,15 @@ void FixedGridRhoProducerFastjetFromRecHit::getHitP4(const DetId &detId, float h
   const CaloSubdetectorGeometry* subDetGeom = caloGeometry.getSubdetectorGeometry(detId);
   std::shared_ptr<const CaloCellGeometry> cellGeom = subDetGeom!=nullptr ? subDetGeom->getGeometry(detId) : std::shared_ptr<const CaloCellGeometry>();
   if(cellGeom!=nullptr){
-    // use repPos() from cached memory instead of getPosition() to save CPU time
     const auto &gpPos = cellGeom->repPos();
     double thispt=hitE/cosh(gpPos.eta());
-    hitp4.SetPtEtaPhiE(thispt,gpPos.eta(),gpPos.phi(),hitE);
+    double thispx=thispt*cos(gpPos.phi());
+    double thispy=thispt*sin(gpPos.phi());
+    double thispz=thispt*sinh(gpPos.eta());
+    hitp4.SetPxPyPzE(thispx,thispy,thispz,hitE);
   }else{
     if(detId.rawId()!=0) edm::LogInfo("FixedGridRhoProducerFastjetFromRecHit") <<"Warning : Geometry not found for a calo hit, setting p4 as (0,0,0,0)" << std::endl;
-    hitp4.SetPtEtaPhiE(0,0,0,0);
+    hitp4.SetPxPyPzE(0,0,0,0);
   }
 }
 
@@ -132,5 +148,17 @@ bool FixedGridRhoProducerFastjetFromRecHit::passedEcalNoiseCut(const EcalRecHit 
   if ( hit.energy() > (*thresholds)[hit.detid()]) passed=true;
   return passed;
 }
+
+//calotower-like flat noise threshold
+/*
+bool FixedGridRhoProducerFastjetFromRecHit::passedEcalNoiseCut(const EcalRecHit &hit,const EcalPFRecHitThresholds *thresholds) {
+  bool passed=false;
+  //if ( hit.energy() > (*thresholds)[hit.detid()]) passed=true;
+  //  const EcalDetId thisDetId(hit.detid());
+  if ( (hit.detid().subdetId() == EcalBarrel) &&  (hit.energy() >= 0.07 ) ) passed=true;
+  if ( (hit.detid().subdetId() == EcalEndcap) &&  (hit.energy() >= 0.3  ) ) passed=true;
+  return passed;
+}
+*/
 
 DEFINE_FWK_MODULE(FixedGridRhoProducerFastjetFromRecHit);
