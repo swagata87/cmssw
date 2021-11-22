@@ -6,7 +6,8 @@ import logging
 import argparse
 import subprocess
 import time, datetime
-import urllib2
+#import urllib2
+import urllib
 import json
 
 from . import tools

@@ -46,6 +46,7 @@ class DTCalibrationWorker(object):
         for line in proc.stdout:
           (key, _, value) = line.partition("=")
           os.environ[key] = value.replace("\n","")
+
         for path in os.environ['PYTHONPATH'].split(':'):
             sys.path.append(path)
         proc.communicate()
@@ -59,7 +60,7 @@ class DTCalibrationWorker(object):
                 workflow_class = eval( class_name )
                 workflow_class.add_parser_options(workflow_parser)
             except:
-                log.error("No class with name: %s exists bot workflow exists in %s" %
+                log.error("No class with name: %s exists but workflow exists in %s" %
                             (class_name, DTCalibrationWorker)
                          )
 

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 import sys,os,time,datetime,logging
 import argparse
 from CalibMuon.DTCalibration.Workflow.DTCalibrationWorker import DTCalibrationWorker
@@ -20,8 +20,9 @@ def main():
     log.info(" ".join(sys.argv))
 
     start = time.time()
-    print "DT Calibration starting "
-    print "Running at",options.working_dir
+    print ("DT Calibration starting ")
+    #print ("Running at",options.working_dirs)
+    print ("Running at",options.working_dir)
 
     #stdout_original = sys.stdout
     #sys.stdout = logOut
@@ -30,21 +31,22 @@ def main():
     local_path = dtCalibWorker.run()
 
     # move the log file to the working directory to avoid cluttering up the base directory
-    print "Job dir is",local_path
-    print "Log file is",log_file_name
+    print ("Job dir is",local_path)
+    print ("Log file is",log_file_name)
     os.rename(log_file_name,local_path+log_file_name)
 
     #sys.stdout = stdout_original
     stop = time.time()
-    print "DT Calibration finished"
-    print "Time elapsed was %.1f seconds"%(stop-start)
+    print ("DT Calibration finished")
+    print ("Time elapsed was %.1f seconds"%(stop-start))
 
 def setupLogging(options):
     #setup logging
     format = '%(levelname)s (%(name)s) [%(asctime)s]: %(message)s'
     #logging.basicConfig( level=logging._levelNames[ options.debug ], format=format, datefmt=date )
     logging.basicConfig(filename=log_file_name, level=logging.DEBUG, format=format, datefmt=date )
-    log.setLevel(logging._levelNames[ options.debug ])
+    #log.setLevel(logging._levelNames[ options.debug ])
+    log.setLevel(logging._nameToLevel[ options.debug ])
     #formatter = logging.Formatter( format )
     #hdlr = logging.FileHandler( log_file_name, mode='w' )
     #hdlr.setFormatter( formatter )
