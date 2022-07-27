@@ -524,11 +524,9 @@ electronMCTable = cms.EDProducer("CandMCMatchTableProducer",
     docString = cms.string("MC matching to status==1 electrons or photons"),
     genparticles     = cms.InputTag("finalGenParticles"), 
 )
-
 electronTask = cms.Task(bitmapVIDForEle,bitmapVIDForEleHEEP,isoForEle,ptRatioRelForEle,seedGainEle,calibratedPatElectronsNano,slimmedElectronsWithUserData,finalElectrons)
 electronTablesTask = cms.Task(electronMVATTH, electronTable)
 electronMCTask = cms.Task(tautaggerForMatching, matchingElecPhoton, electronsMCMatchForTable, electronsMCMatchForTableAlt, electronMCTable)
-
 # Revert back to AK4 CHS jets for Run 2
 run2_nanoAOD_ANY.toModify(ptRatioRelForEle,srcJet="updatedJets")
 
