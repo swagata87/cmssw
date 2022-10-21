@@ -50,7 +50,9 @@ numWFStart={
 }
 numWFSkip=200
 # temporary measure to keep other WF numbers the same
-numWFConflict = [[20000,38600],[39000,39400],[39800,40600],[50000,51000]]
+numWFConflict = [[20400,20800], #D87
+                 [21200,22000], #D89-D90
+                 [50000,51000]]
 numWFAll={
     2017: [],
     2026: []
@@ -1334,6 +1336,23 @@ upgradeWFs['HLT75e33'] = UpgradeWorkflow_HLT75e33(
     offset = 0.75,
 )
 
+class UpgradeWorkflow_HLTwDIGI75e33(UpgradeWorkflow):
+    def setup_(self, step, stepName, stepDict, k, properties):
+        if 'DigiTrigger' in step:
+            stepDict[stepName][k] = merge([{'-s':'DIGI:pdigi_valid,L1TrackTrigger,L1,DIGI2RAW,HLT:@relval2026'}, stepDict[step][k]])
+    def condition(self, fragment, stepList, key, hasHarvest):
+        return fragment=="TTbar_14TeV" and '2026' in key
+upgradeWFs['HLTwDIGI75e33'] = UpgradeWorkflow_HLTwDIGI75e33(
+    steps = [
+        'DigiTrigger',
+    ],
+    PU = [
+        'DigiTrigger',
+    ],
+    suffix = '_HLTwDIGI75e33',
+    offset = 0.76,
+)
+
 class UpgradeWorkflow_Neutron(UpgradeWorkflow):
     def setup_(self, step, stepName, stepDict, k, properties):
         if 'GenSim' in step:
@@ -1509,7 +1528,7 @@ class UpgradeWorkflowAging(UpgradeWorkflow):
         if 'Digi' in step or 'Reco' in step:
             stepDict[stepName][k] = merge([{'--customise': 'SLHCUpgradeSimulations/Configuration/aging.customise_aging_'+self.lumi}, stepDict[step][k]])
     def condition(self, fragment, stepList, key, hasHarvest):
-        return fragment=="TTbar_14TeV" and '2026' in key
+        return '2026' in key
 # define several of them
 upgradeWFs['Aging1000'] = UpgradeWorkflowAging(
     steps =  [
