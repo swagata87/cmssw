@@ -920,20 +920,14 @@ def ReclusterAK4CHSJets(proc, recoJA, runOnMC):
 
   (~run2_nanoAOD_ANY).toModify(proc.updatedJetsWithUserData.userFloats,
     leadTrackPt = None,
-    leptonPtRel = None,
-    leptonPtRatio = None,
-    leptonPtRelInv = None,
     leptonPtRelv0 = None,
-    leptonPtRatiov0 = None,
     leptonPtRelInvv0 = None,
     leptonDeltaR = None,
-    leptonPt = None,
     vtxPt = None,
     vtxMass = None,
     vtx3dL = None,
     vtx3deL = None,
     ptD = None,
-    genPtwNu = None
   )
 
   (~run2_nanoAOD_ANY).toModify(proc.updatedJetsWithUserData.userInts,
@@ -1338,15 +1332,11 @@ def PrepJMECustomNanoAOD(process,runOnMC):
 
   return process
 
-from PhysicsTools.NanoAOD.V10.nano_cff import nanoAOD_customizeV10
-
 def PrepJMECustomNanoAOD_MC(process):
-  process = nanoAOD_customizeV10(process)
   process = PrepJMECustomNanoAOD(process,runOnMC=True)
 
   return process
 
 def PrepJMECustomNanoAOD_Data(process):
-  process = nanoAOD_customizeV10(process)
   process = PrepJMECustomNanoAOD(process,runOnMC=False)
   return process

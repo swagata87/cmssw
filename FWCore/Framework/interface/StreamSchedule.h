@@ -66,7 +66,6 @@
 #include "FWCore/Framework/interface/OccurrenceTraits.h"
 #include "FWCore/Framework/interface/UnscheduledCallProducer.h"
 #include "FWCore/Framework/interface/WorkerManager.h"
-#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Path.h"
 #include "FWCore/Framework/interface/TransitionInfoTypes.h"
 #include "FWCore/Framework/interface/maker/Worker.h"
@@ -249,6 +248,8 @@ namespace edm {
 
     void initializeEarlyDelete(ModuleRegistry& modReg,
                                std::vector<std::string> const& branchesToDeleteEarly,
+                               std::multimap<std::string, std::string> const& referencesToBranches,
+                               std::vector<std::string> const& modulesToSkip,
                                edm::ProductRegistry const& preg);
 
     /// returns the collection of pointers to workers

@@ -63,7 +63,8 @@ Tracker:
 * T24: Phase2 tilted tracker. Tracker detector description itself is identical to T21 (OT800 IT615). Change of paradigm, entire description reworked to be compatible with DD4hep library.
 * T25: Phase2 tilted tracker. Outer Tracker (v8.0.0): same as T24/T21. Inner Tracker (v7.0.2): Based on (v6.1.5) (T24/T21), but with 3D sensors in TBPX L1. Compatible with DD4hep library.
 * T26: Phase2 tilted tracker. Outer Tracker (v8.0.0): same as T24/T21. Inner Tracker (v7.0.3): Based on (v6.1.5) (T24/T21), but with 3D sensors in TBPX L1 and 50x50 pixel aspect ratio in TFPX and TEPX. Compatible with DD4hep library.
-* T30: Phase2 titled tracker. Exploratory geometry *only to be used in D91 for now*. Outer Tracker (v8.0.1): based on v8.0.0 with updated TB2S spacing. Inner Tracker (v6.4.0): based on v6.1.5 but TFPX with more realistic module positions.
+* T30: Phase2 tilted tracker. Exploratory geometry *only to be used in D91 for now*. Outer Tracker (v8.0.1): based on v8.0.0 with updated TB2S spacing. Inner Tracker (v6.4.0): based on v6.1.5 but TFPX with more realistic module positions.
+* T31: Phase2 tilted tracker. The tracker description is identical to T24/T21. The outer radius of the tracker volume is reduced to avoid a clash with the BTL geometry. The positions of the tracker components are not affected
 
 Calorimeters:
 * C9: HGCal (v11 post TDR HGCal Geometry w/ corner centering for HE part) + Phase2 HCAL and EB + Tracker cables (used in 2026D49)
@@ -111,19 +112,7 @@ The script also handles the common and forward elements of the geometry:
 * F8: same as F6 or F7 without BRM
 
 Several detector combinations have been generated:
-* D49 = T15+C9+M4+I10+O4+F2 (HLT TDR baseline)
-* D60 = T15+C10+M4+I10+O4+F3 (With HFNose)
-* D68 = T21+C11+M6+I11+O5+F4 (For HGCAL study on evolution of detector)
-* D70 = T21+C13+M7+I11+O6+F6 (For HGCAL study on evolution of detector)
-* D76 = T21+C14+M9+I13+O7+F6
-* D77 = T24+C14+M9+I13+O7+F6 (Current default scenario)
-* D80 = T25+C14+M9+I13+O7+F6
-* D81 = T26+C14+M9+I13+O7+F6
-* D82 = T21+C15+M9+I13+O7+F7
-* D83 = T24+C16+M9+I13+O7+F6
-* D84 = T24+C13+M7+I11+O6+F6 (For HGCAL study on evolution of HGCal replacing D70)
-* D85 = T24+C14+M9+I14+O7+F6
-* D86 = T24+C17+M10+I14+O8+F6
+* D86 = T24+C17+M10+I14+O8+F6 (Current Phase-2 baseline)
 * D88 = T24+C17+M10+I15+O9+F6
 * D91 = T30+C17+M10+I15+O9+F6
 * D92 = T24+C18+M10+I15+O9+F6

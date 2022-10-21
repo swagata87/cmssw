@@ -787,6 +787,10 @@ namespace pat {
         unpackTrk();
       return *track_;
     }
+    /// Return reference to a pseudo track made with candidate kinematics,
+    /// parameterized error for eta,phi,pt and full IP covariance
+    /// and the coviriance matrix is forced to be positive definite according to BPH recommandations
+    virtual const reco::Track pseudoPosDefTrack() const;
 
     /// return a pointer to the track if present. otherwise, return a null pointer
     const reco::Track *bestTrack() const override {
@@ -1104,6 +1108,9 @@ namespace pat {
       return covarianceParameterization_;
     }
 
+    /// details (hit pattern) of the first hit on track
+    uint16_t firstHit_;
+
     /// check overlap with another Candidate
     bool overlap(const reco::Candidate &) const override;
     template <typename, typename, typename>
@@ -1138,8 +1145,6 @@ namespace pat {
     static constexpr int EXPO_TIMEERROR = 5;            // power of 2 used in encoding timeError
     static constexpr int EXPO_TIME_NOERROR = 6;         // power of 2 used in encoding time without timeError
     static constexpr int EXPO_TIME_WITHERROR = -6;      // power of 2 used in encoding time with timeError
-  public:
-    uint16_t firstHit_;
   };
 
   typedef std::vector<pat::PackedCandidate> PackedCandidateCollection;
