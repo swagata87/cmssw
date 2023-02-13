@@ -61,3 +61,11 @@ particleFlowRecHitHBHEOnly = particleFlowRecHitHBHE.clone(
 run3_HB.toModify(particleFlowRecHitHBHEOnly,
     producers = { 0: dict(src = "hbhereco") }
 )
+
+# offline 2023 HB recHit threshold
+from Configuration.Eras.Modifier_HB_2023_cff import HB_2023
+_thresholdsHBphase1_2023 = cms.vdouble(0.4, 0.3, 0.3, 0.3)
+
+HB_2023.toModify(particleFlowRecHitHBHE,
+    producers = {0 : dict(qualityTests = {0 : dict(cuts = {0 : dict(threshold = _thresholdsHBphase1_2023) } ) } ) },
+)
