@@ -13,5 +13,5 @@ egammaHBHERecHit_2023 = egammaHBHERecHit.clone(
     recHitEThresholdHB = _thresholdsHBphase1_2023
 )
 
-from Configuration.Eras.Modifier_run3_2023_egamma_cff import run3_2023_egamma
-run3_2023_egamma.toReplaceWith(egammaHBHERecHit,egammaHBHERecHit_2023)
+from Configuration.Eras.Modifier_run3_egamma_2023_cff import run3_egamma_2023
+run3_egamma_2023.toReplaceWith(egammaHBHERecHit,egammaHBHERecHit_2023)
