@@ -20,6 +20,7 @@
 #include "HeterogeneousCore/AlpakaInterface/interface/config.h"
 #include "HeterogeneousCore/AlpakaServices/interface/alpaka/AlpakaService.h"
 #include "HeterogeneousCore/AlpakaCore/interface/alpaka/global/EDProducer.h"
+#include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include "SuperclusterAlgo.h"
 
@@ -27,8 +28,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
   class SuperclusterCopyToDeviceProducer : public global::EDProducer<> {
   public:
     SuperclusterCopyToDeviceProducer(edm::ParameterSet const& config)
-        : deviceToken_{produces()}, size_{config.getParameter<int32_t>("size")} {}
-
+      : deviceToken_{produces()},
+	size_{config.getParameter<int32_t>("size")}
+    {
+      superClustersTokens_ = consumes(config.getParameter<edm::InputTag>("getsuperclus"));
+    }
+  
     void produce(edm::StreamID sid, device::Event& event, device::EventSetup const&) const override {
 
       portableSuperclusterSoA::SuperclusterHostCollection hostProduct{size_, event.queue()};
@@ -38,27 +43,31 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       int i=0;
       for (auto& superClusRef : event.get(superClustersTokens_)) {
-	view[i].scSeedTheta() =  superClusRef->seed()->position().theta();
-	view[i].scPhi() = superClusRef->position().phi();
-	view[i].scR() = superClusRef->position().r();
-	view[i].scEnergy() = superClusRef->energy();
+	view[i].scSeedTheta() =  superClusRef.seed()->position().theta();
+	view[i].scPhi() = superClusRef.position().phi();
+	view[i].scR() = superClusRef.position().r();
+	view[i].scEnergy() = superClusRef.energy();
 	i++;
       }
-     
+
+      alpaka::memcpy(event.queue(), deviceProduct.buffer(), hostProduct.buffer());
+
       event.emplace(deviceToken_, std::move(deviceProduct));
     }
 
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
       edm::ParameterSetDescription desc;
       desc.add<int32_t>("size");
+      desc.add<edm::InputTag>("getsuperclus");
       descriptions.addWithDefaultLabel(desc);
     }
 
   private:
 
-     const device::EDPutToken<portableSuperclusterSoA::SuperclusterDeviceCollection> deviceToken_;
+    const device::EDPutToken<portableSuperclusterSoA::SuperclusterDeviceCollection> deviceToken_;
     const int32_t size_;
-    edm::EDGetTokenT<std::vector<reco::SuperClusterRef>> superClustersTokens_;
+    //    edm::EDGetTokenT<std::vector<reco::SuperClusterRef>> superClustersTokens_;
+    edm::EDGetTokenT<std::vector<reco::SuperCluster>> superClustersTokens_;
 
     // implementation of the algorithm
     //    SuperclusterAlgo algo_;
