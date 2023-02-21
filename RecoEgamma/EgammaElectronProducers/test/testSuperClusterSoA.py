@@ -18,7 +18,7 @@ process.testSoA = cms.EDProducer( "SuperclusterCopyToDeviceProducer@alpaka",
 )
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(100)
 )
 
 process.source = cms.Source( "PoolSource",
@@ -27,7 +27,23 @@ process.source = cms.Source( "PoolSource",
     ),
     inputCommands = cms.untracked.vstring(
         'keep *'
+        
     )
 )
 
+
+process.out = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring(
+        #'keep *'
+        'drop *',
+        'keep *_testSoA_*_*',
+        'keep *_testSoASerial_*_*',), 
+        #'keep recoSuperClusters*_*_*_*', 
+        #'keep *_iterativeCone5CaloJets_*_*', 
+        #'keep *_*_*_electrons', 
+        #'keep *HepMCProduct_*_*_*'),
+    fileName = cms.untracked.string('electronsoa.root')
+)
+
 process.p = cms.Path(process.testSoA)
+process.output_path = cms.EndPath(process.out)
