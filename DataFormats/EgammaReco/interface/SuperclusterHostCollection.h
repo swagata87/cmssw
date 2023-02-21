@@ -9,7 +9,7 @@ namespace portableSuperclusterSoA {
 
   // SoA with x, y, z, id fields in host memory
   using SuperclusterHostCollection = PortableHostCollection<SuperClusterSoA>;
-
+  
 }  // namespace portableSuperclusterSoA
 
 #endif  // DataFormats_PortableTestObjects_interface_TestHostCollection_h

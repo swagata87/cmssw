@@ -7,7 +7,7 @@
 #include "DataFormats/SoATemplate/interface/SoALayout.h"
 #include "DataFormats/SoATemplate/interface/SoAView.h"
 
-#include "DataFormats/EgammaReco/interface/SuperCluster.h"
+//#include "DataFormats/EgammaReco/interface/SuperCluster.h"
 
 namespace portableSuperclusterSoA {
 
