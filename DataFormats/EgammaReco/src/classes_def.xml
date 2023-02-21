@@ -1,5 +1,8 @@
 <lcgdict>
 
+  <class name="portableSuperclusterSoA::SuperClusterSoA"/>
+  <class name="portableSuperclusterSoA::SuperClusterSoA::View"/>
+  
   <class name="edm::RefToBase<reco::CaloCluster>"/>
   <class name="edm::reftobase::BaseHolder<reco::CaloCluster>"/>
   <class name="edm::reftobase::IndirectHolder<reco::CaloCluster>" />

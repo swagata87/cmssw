@@ -1,0 +1,15 @@
+<lcgdict>
+  <class name="portableSuperclusterSoA::SuperclusterHostCollection"/>
+  <read
+    sourceClass="portableSuperclusterSoA::SuperclusterHostCollection"
+    targetClass="portableSuperclusterSoA::SuperclusterHostCollection"
+    version="[1-]"
+    source="portableSuperclusterSoA::SuperClusterSoA layout_;"
+    target="buffer_"
+    embed="false">
+  <![CDATA[
+    portableSuperclusterSoA::SuperclusterHostCollection::ROOTReadStreamer(newObj, onfile.layout_);
+  ]]>
+  </read>
+  <class name="edm::Wrapper<portableSuperclusterSoA::SuperclusterHostCollection>" splitLevel="0"/>
+</lcgdict>
