@@ -9,7 +9,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   class SuperclusterAlgo {
   public:
-    void fill(Queue& queue, portableSuperclusterSoA::SuperclusterDeviceCollection& collection, double xvalue = 0.) const;
+    void print(Queue& queue, portableSuperclusterSoA::SuperclusterDeviceCollection& collection) const;
   };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

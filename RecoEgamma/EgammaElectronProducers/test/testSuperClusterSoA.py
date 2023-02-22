@@ -8,6 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.EventContent.EventContent_cff")
+process.MessageLogger.TestAlpakaAnalyzer = cms.untracked.PSet()
 
 process.load('Configuration.StandardSequences.Accelerators_cff')
 process.load('HeterogeneousCore.AlpakaCore.ProcessAcceleratorAlpaka_cfi')
@@ -17,8 +18,9 @@ process.testSoA = cms.EDProducer( "SuperclusterCopyToDeviceProducer@alpaka",
     getsuperclus = cms.InputTag("particleFlowSuperClusterECAL","particleFlowSuperClusterECALBarrel"),
 )
 
+
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(100)
+    input = cms.untracked.int32(5)
 )
 
 process.source = cms.Source( "PoolSource",
@@ -33,17 +35,15 @@ process.source = cms.Source( "PoolSource",
 
 
 process.out = cms.OutputModule("PoolOutputModule",
-    outputCommands = cms.untracked.vstring(
-        #'keep *'
-        'drop *',
-        'keep *_testSoA_*_*',
-        'keep *_testSoASerial_*_*',), 
-        #'keep recoSuperClusters*_*_*_*', 
-        #'keep *_iterativeCone5CaloJets_*_*', 
-        #'keep *_*_*_electrons', 
-        #'keep *HepMCProduct_*_*_*'),
-    fileName = cms.untracked.string('electronsoa.root')
-)
+                               outputCommands = cms.untracked.vstring(
+                                   'keep *',),
+                               #'drop *',
+                               #'keep *_testSoA_*_*',
+                               #'keep *_testSoASerial_*_*',), 
+                               fileName = cms.untracked.string('electronsoa.root'))
+                               
 
-process.p = cms.Path(process.testSoA)
+
+                               
+process.p = cms.Path(process.testSoA )
 process.output_path = cms.EndPath(process.out)

@@ -40,18 +40,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       portableSuperclusterSoA::SuperclusterDeviceCollection deviceProduct{size_, event.queue()};
 
       auto& view = hostProduct.view();
-
+      //printf("Printed from host : \n");
+            
       int i=0;
       for (auto& superClusRef : event.get(superClustersTokens_)) {
-	view[i].scSeedTheta() =  superClusRef.seed()->position().theta();
-	view[i].scPhi() = superClusRef.position().phi();
-	view[i].scR() = superClusRef.position().r();
-	view[i].scEnergy() = superClusRef.energy();
+	printf("For SC i=%d Energy is :%f , theta is :%f, \n",i,superClusRef->energy(),superClusRef->seed()->position().theta()) ;
+	view[i].scSeedTheta() =  superClusRef->seed()->position().theta();
+	view[i].scPhi() = superClusRef->position().phi();
+	view[i].scR() = superClusRef->position().r();
+	view[i].scEnergy() = superClusRef->energy();
 	i++;
       }
 
       alpaka::memcpy(event.queue(), deviceProduct.buffer(), hostProduct.buffer());
-
+      algo_.print(event.queue(), deviceProduct);
       event.emplace(deviceToken_, std::move(deviceProduct));
     }
 
@@ -66,10 +68,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     const device::EDPutToken<portableSuperclusterSoA::SuperclusterDeviceCollection> deviceToken_;
     const int32_t size_;
-    //    edm::EDGetTokenT<std::vector<reco::SuperClusterRef>> superClustersTokens_;
-    edm::EDGetTokenT<std::vector<reco::SuperCluster>> superClustersTokens_;
+    edm::EDGetTokenT<std::vector<reco::SuperClusterRef>> superClustersTokens_;
+    //edm::EDGetTokenT<std::vector<reco::SuperCluster>> superClustersTokens_;
 
     // implementation of the algorithm
+        SuperclusterAlgo const algo_{};
     //    SuperclusterAlgo algo_;
   };
 

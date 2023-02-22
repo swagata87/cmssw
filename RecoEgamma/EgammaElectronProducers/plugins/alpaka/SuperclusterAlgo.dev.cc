@@ -23,25 +23,25 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     template <typename TAcc, typename = std::enable_if_t<alpaka::isAccelerator<TAcc>>>
     ALPAKA_FN_ACC void operator()(TAcc const& acc,
                                   portableSuperclusterSoA::SuperclusterDeviceCollection::View view,
-                                  int32_t size,
-                                  double xvalue) const {
+                                  int32_t size) const {
       // global index of the thread within the grid
       const int32_t thread = alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u];
-      //const portabletest::Matrix matrix{{1, 2, 3, 4, 5, 6}, {2, 4, 6, 8, 10, 12}, {3, 6, 9, 12, 15, 18}};
 
       // set this only once in the whole kernel grid
       if (thread == 0) {
         view.r() = 1.;
       }
 
+      //printf("Printed from device : ");
       // make a strided loop over the kernel grid, covering up to "size" elements
       for (int32_t i : elements_with_stride(acc, size)) {
-        view[i] = {xvalue, 0, 0, 0, i};
+	printf("\n\nFor SC i=%d Energy is :%f , theta is :%f, \n",i,view[i].scEnergy(),view[i].scSeedTheta()) ;
+	//       view[i] = {xvalue, 0, 0, 0, i};
       }
     }
   };
 
-  void SuperclusterAlgo::fill(Queue& queue, portableSuperclusterSoA::SuperclusterDeviceCollection& collection, double xvalue) const {
+  void SuperclusterAlgo::print(Queue& queue, portableSuperclusterSoA::SuperclusterDeviceCollection& collection) const {
     // use 64 items per group (this value is arbitrary, but it's a reasonable starting point)
     uint32_t items = 64;
 
@@ -53,7 +53,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     //   - elements within a single thread on a CPU backend
     auto workDiv = make_workdiv<Acc1D>(groups, items);
 
-    alpaka::exec<Acc1D>(queue, workDiv, SuperclusterAlgoKernel{}, collection.view(), collection->metadata().size(), xvalue);
+    alpaka::exec<Acc1D>(queue, workDiv, SuperclusterAlgoKernel{}, collection.view(), collection->metadata().size());
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
