@@ -1,19 +1,3 @@
-//******************************************************************************
-//
-// Part of the refactorisation of of the E/gamma pixel matching for 2017 pixels
-// This refactorisation converts the monolithic  approach to a series of
-// independent producer modules, with each modules performing  a specific
-// job as recommended by the 2017 tracker framework
-//
-//
-// The module produces the ElectronSeeds, similarly to ElectronSeedProducer
-// although with a varible number of required hits
-//
-//
-// Author : Sam Harper (RAL), 2017
-//
-//*******************************************************************************
-
 #include "FWCore/Framework/interface/global/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -22,6 +6,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
+#include "FWCore/Framework/interface/ESProducer.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -34,136 +19,56 @@
 #include "Geometry/Records/interface/TrackerTopologyRcd.h"
 #include "TrackingTools/MaterialEffects/interface/PropagatorWithMaterial.h"
 #include "DataFormats/TrajectorySeed/interface/PropagationDirection.h"
-
-#include "RecoEgamma/EgammaElectronAlgos/interface/TrajSeedMatcher.h"
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 class ElectronNHitSeedProducerNew : public edm::global::EDProducer<> {
 public:
-  //  explicit ElectronNHitSeedProducerNew(const edm::ParameterSet&, const MagneticField*);
-  explicit ElectronNHitSeedProducerNew(const edm::ParameterSet&);
-
+  ElectronNHitSeedProducerNew(const edm::ParameterSet&);
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const final;
-
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
-  //new addition start
-  PropagatorWithMaterial* forwardPropagator_;
-  PropagationDirection dir_;
-  const MagneticField* theMF_;
-
-  //new addition end
-  /////
-  /////
-  const TrajSeedMatcher::Configuration matcherConfiguration_;
-  //  std::vector<edm::EDGetTokenT<std::vector<reco::SuperClusterRef>>> superClustersTokens_;
-  edm::EDGetTokenT<std::vector<reco::SuperClusterRef>> superClustersTokens_;
   const edm::EDGetTokenT<TrajectorySeedCollection> initialSeedsToken_;
-  const edm::EDGetTokenT<std::vector<reco::Vertex>> verticesToken_;
-  const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;
-  const edm::EDGetTokenT<MeasurementTrackerEvent> measTkEvtToken_;
-  const edm::EDPutTokenT<reco::ElectronSeedCollection> putToken_;
-  const edm::ESGetToken<TrackerTopology, TrackerTopologyRcd> trackerTopologyToken_;
+  edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> magFieldToken_;
+  edm::EDGetTokenT<std::vector<reco::SuperClusterRef>> superClustersTokens_;
 };
 
-namespace {
-  int getLayerOrDiskNr(DetId detId, const TrackerTopology& trackerTopo) {
-    if (detId.subdetId() == PixelSubdetector::PixelBarrel) {
-      return trackerTopo.pxbLayer(detId);
-    } else if (detId.subdetId() == PixelSubdetector::PixelEndcap) {
-      return trackerTopo.pxfDisk(detId);
-    } else
-      return -1;
-  }
-
-  reco::ElectronSeed::PMVars makeSeedPixelVar(const TrajSeedMatcher::MatchInfo& matchInfo,
-                                              const TrackerTopology& trackerTopo) {
-    int layerOrDisk = getLayerOrDiskNr(matchInfo.detId, trackerTopo);
-    reco::ElectronSeed::PMVars pmVars;
-    pmVars.setDet(matchInfo.detId, layerOrDisk);
-    pmVars.setDPhi(matchInfo.dPhiPos, matchInfo.dPhiNeg);
-    pmVars.setDRZ(matchInfo.dRZPos, matchInfo.dRZNeg);
-
-    return pmVars;
-  }
-
-}  // namespace
-
-//ElectronNHitSeedProducerNew::ElectronNHitSeedProducerNew(const edm::ParameterSet& pset, const MagneticField* field)
 ElectronNHitSeedProducerNew::ElectronNHitSeedProducerNew(const edm::ParameterSet& pset)
-    : matcherConfiguration_(pset.getParameter<edm::ParameterSet>("matcherConfig"), consumesCollector()),
-      initialSeedsToken_(consumes(pset.getParameter<edm::InputTag>("initialSeeds"))),
-      verticesToken_(consumes(pset.getParameter<edm::InputTag>("vertices"))),
-      beamSpotToken_(consumes(pset.getParameter<edm::InputTag>("beamSpot"))),
-      measTkEvtToken_(consumes(pset.getParameter<edm::InputTag>("measTkEvt"))),
-      putToken_{produces<reco::ElectronSeedCollection>()},
-      trackerTopologyToken_{esConsumes()} {
-  //  for (const auto& scTag : pset.getParameter<std::vector<edm::InputTag>>("superClusters")) {
-  //for (const auto& scTag : pset.getParameter<std::vector<edm::InputTag>>("superClusters")) {
-    //superClustersTokens_.emplace_back(consumes(scTag));
-    //}
+  :   initialSeedsToken_(consumes(pset.getParameter<edm::InputTag>("initialSeeds"))),
+      magFieldToken_(esConsumes())
+{
   superClustersTokens_ = consumes(pset.getParameter<edm::InputTag>("superClusters"));
-  forwardPropagator_ = new PropagatorWithMaterial(dir_ = alongMomentum, 0.000511, theMF_);
-  //  void setMagneticField(const MagneticField* mf) { theMF_ = mf; }
-
 }
 
 void ElectronNHitSeedProducerNew::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("initialSeeds", {"hltElePixelSeedsCombined"});
-  desc.add<edm::InputTag>("vertices", {});
-  desc.add<edm::InputTag>("beamSpot", {"hltOnlineBeamSpot"});
-  desc.add<edm::InputTag>("measTkEvt", {"hltSiStripClusters"});
   desc.add<edm::InputTag>("superClusters", {"hltEgammaSuperClustersToPixelMatch"});
-  //  desc.add<std::vector<edm::InputTag>>("superClusters", {{"hltEgammaSuperClustersToPixelMatch"}});
-  desc.add<edm::ParameterSetDescription>("matcherConfig", TrajSeedMatcher::makePSetDescription());
 
   descriptions.add("electronNHitSeedProducerNew", desc);
 }
 
 void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
 
+  auto const& magField = iSetup.getData(magFieldToken_);
+  
+  GlobalPoint center(0.0, 0.0, 0.0);
+  float theMagField = magField.inTesla(center).mag();
+  std::cout << "theMagField = " << theMagField << std::endl;
+  
   for (auto& initialSeedRef : iEvent.get(initialSeedsToken_)) {
-    std::cout << "nhit in seed " << initialSeedRef.nHits() << std::endl;
+    //    std::cout << "nhit in seed " << initialSeedRef.nHits() << std::endl;
     int nHitInSeed=initialSeedRef.nHits();
     for (int i=0; i<nHitInSeed; i++) {
       auto const& recHit = *(initialSeedRef.recHits().begin() + i);
-      std::cout << "hit valid? " <<  recHit.isValid() << std::endl;
-      std::cout << "hit " << i << " pos X "  << recHit.globalPosition().x() << std::endl;
+      //std::cout << "hit valid? " <<  recHit.isValid() << std::endl;
+      //std::cout << "hit " << i << " pos X "  << recHit.globalPosition().x() << std::endl;
       
     }
   }
 
-  auto const& trackerTopology = iSetup.getData(trackerTopologyToken_);
-  reco::ElectronSeedCollection eleSeeds{};
-  TrajSeedMatcher matcher{iEvent.get(initialSeedsToken_),
-                          iEvent.get(beamSpotToken_).position(),
-                          matcherConfiguration_,
-                          iSetup,
-                          iEvent.get(measTkEvtToken_)};
-
-  // Loop over all super-cluster collections (typically barrel and forward are supplied separately)
-  //  for (const auto& superClustersToken : superClustersTokens_) {
-    for (auto& superClusRef : iEvent.get(superClustersTokens_)) {
-      //the eta of the supercluster when mustache clustered is slightly biased due to bending in magnetic field
-      //the eta of its seed cluster is a better estimate of the orginal position
-      GlobalPoint caloPosition(GlobalPoint::Polar(superClusRef->seed()->position().theta(),  //seed theta
-                                                  superClusRef->position().phi(),            //supercluster phi
-                                                  superClusRef->position().r()));            //supercluster r
-
-      for (auto const& matchedSeed : matcher(caloPosition, superClusRef->energy())) {
-        reco::ElectronSeed eleSeed(matchedSeed.seed);
-        reco::ElectronSeed::CaloClusterRef caloClusRef(superClusRef);
-        eleSeed.setCaloCluster(caloClusRef);
-        eleSeed.setNrLayersAlongTraj(matchedSeed.nrValidLayers);
-        for (auto const& matchInfo : matchedSeed.matchInfos) {
-          eleSeed.addHitInfo(makeSeedPixelVar(matchInfo, trackerTopology));
-        }
-        eleSeeds.emplace_back(eleSeed);
-      }
-    }
-
-  iEvent.emplace(putToken_, std::move(eleSeeds));
+  //  iEvent.emplace(putToken_, std::move(eleSeeds));
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"

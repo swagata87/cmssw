@@ -7892,46 +7892,46 @@ process.hltEgammaElectronPixelSeeds = cms.EDProducer( "ElectronNHitSeedProducer"
 #swagata
 process.hltEgammaElectronPixelSeedsNew = cms.EDProducer( "ElectronNHitSeedProducerNew",
     initialSeeds = cms.InputTag( "hltElePixelSeedsCombined" ),
-    vertices = cms.InputTag( "" ),
-    beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
-    measTkEvt = cms.InputTag( "hltSiStripClusters" ),
+    #vertices = cms.InputTag( "" ),
+    #beamSpot = cms.InputTag( "hltOnlineBeamSpot" ),
+    #measTkEvt = cms.InputTag( "hltSiStripClusters" ),
     superClusters = cms.InputTag( 'hltEgammaSuperClustersToPixelMatch' ),
-    matcherConfig = cms.PSet( 
-      useRecoVertex = cms.bool( False ),
-      minNrHits = cms.vuint32( 2, 3 ),
-      matchingCuts = cms.VPSet( 
-        cms.PSet(  dPhiMaxHighEt = cms.vdouble( 0.05 ),
-          version = cms.int32( 2 ),
-          dRZMaxHighEt = cms.vdouble( 9999.0 ),
-          dRZMaxLowEtGrad = cms.vdouble( 0.0 ),
-          dPhiMaxLowEtGrad = cms.vdouble( -0.002 ),
-          dPhiMaxHighEtThres = cms.vdouble( 20.0 ),
-          dRZMaxHighEtThres = cms.vdouble( 0.0 )
-        ),
-        cms.PSet(  etaBins = cms.vdouble(  ),
-          dPhiMaxHighEt = cms.vdouble( 0.003 ),
-          version = cms.int32( 2 ),
-          dRZMaxHighEt = cms.vdouble( 0.05 ),
-          dRZMaxLowEtGrad = cms.vdouble( -0.002 ),
-          dPhiMaxLowEtGrad = cms.vdouble( 0.0 ),
-          dPhiMaxHighEtThres = cms.vdouble( 0.0 ),
-          dRZMaxHighEtThres = cms.vdouble( 30.0 )
-        ),
-        cms.PSet(  etaBins = cms.vdouble(  ),
-          dPhiMaxHighEt = cms.vdouble( 0.003 ),
-          version = cms.int32( 2 ),
-          dRZMaxHighEt = cms.vdouble( 0.05 ),
-          dRZMaxLowEtGrad = cms.vdouble( -0.002 ),
-          dPhiMaxLowEtGrad = cms.vdouble( 0.0 ),
-          dPhiMaxHighEtThres = cms.vdouble( 0.0 ),
-          dRZMaxHighEtThres = cms.vdouble( 30.0 )
-        )
-      ),
-      minNrHitsValidLayerBins = cms.vint32( 4 ),
-      detLayerGeom = cms.ESInputTag( "","hltESPGlobalDetLayerGeometry" ),
-      navSchool = cms.ESInputTag( "","SimpleNavigationSchool" ),
-      paramMagField = cms.ESInputTag( "","ParabolicMf" )
-    )
+    #matcherConfig = cms.PSet( 
+      #useRecoVertex = cms.bool( False ),
+      #minNrHits = cms.vuint32( 2, 3 ),
+      #matchingCuts = cms.VPSet( 
+        #cms.PSet(  dPhiMaxHighEt = cms.vdouble( 0.05 ),
+          #version = cms.int32( 2 ),
+          #dRZMaxHighEt = cms.vdouble( 9999.0 ),
+          #dRZMaxLowEtGrad = cms.vdouble( 0.0 ),
+          #dPhiMaxLowEtGrad = cms.vdouble( -0.002 ),
+          #dPhiMaxHighEtThres = cms.vdouble( 20.0 ),
+          #dRZMaxHighEtThres = cms.vdouble( 0.0 )
+                                                         #),
+        #cms.PSet(  etaBins = cms.vdouble(  ),
+          #dPhiMaxHighEt = cms.vdouble( 0.003 ),
+          #version = cms.int32( 2 ),
+          #dRZMaxHighEt = cms.vdouble( 0.05 ),
+          #dRZMaxLowEtGrad = cms.vdouble( -0.002 ),
+          #dPhiMaxLowEtGrad = cms.vdouble( 0.0 ),
+          #dPhiMaxHighEtThres = cms.vdouble( 0.0 ),
+          #dRZMaxHighEtThres = cms.vdouble( 30.0 )
+                                                         #),
+        #cms.PSet(  etaBins = cms.vdouble(  ),
+          #dPhiMaxHighEt = cms.vdouble( 0.003 ),
+          #version = cms.int32( 2 ),
+          #dRZMaxHighEt = cms.vdouble( 0.05 ),
+          #dRZMaxLowEtGrad = cms.vdouble( -0.002 ),
+          #dPhiMaxLowEtGrad = cms.vdouble( 0.0 ),
+          #dPhiMaxHighEtThres = cms.vdouble( 0.0 ),
+          #dRZMaxHighEtThres = cms.vdouble( 30.0 )
+                                                         #)
+                                                         #),
+      #minNrHitsValidLayerBins = cms.vint32( 4 ),
+      #detLayerGeom = cms.ESInputTag( "","hltESPGlobalDetLayerGeometry" ),
+      #navSchool = cms.ESInputTag( "","SimpleNavigationSchool" ),
+      #paramMagField = cms.ESInputTag( "","ParabolicMf" )
+                                                         #)
 )
 
 process.hltEgammaPixelMatchVars = cms.EDProducer( "EgammaHLTPixelMatchVarProducer",
@@ -8757,7 +8757,7 @@ process.HLTTrackReconstructionForIsoElectronIter02 = cms.Sequence( process.HLTTr
 process.HLTEle32WPTightGsfSequence = cms.Sequence( process.HLTDoFullUnpackingEgammaEcalSequence + process.HLTPFClusteringForEgamma + process.hltEgammaCandidates + process.hltEGL1SingleEGOrFilter + process.hltEG32L1SingleEGOrEtFilter + process.hltEgammaClusterShape + process.hltEle32WPTightClusterShapeFilter + process.HLTDoLocalHcalSequence + process.HLTFastJetForEgamma + process.hltEgammaHoverE + process.hltEle32WPTightHEFilter + process.hltEgammaEcalPFClusterIso + process.hltEle32WPTightEcalIsoFilter + process.HLTPFHcalClustering + process.hltEgammaHcalPFClusterIso + process.hltEle32WPTightHcalIsoFilter + process.HLTElePixelMatchSequence + process.hltEle32WPTightPixelMatchFilter)
                                                    #+ process.hltEle32WPTightPMS2Filter + process.HLTGsfElectronSequence + process.hltEle32WPTightGsfOneOEMinusOneOPFilter + process.hltEle32WPTightGsfMissingHitsFilter + process.hltEle32WPTightGsfDetaFilter + process.hltEle32WPTightGsfDphiFilter + process.HLTTrackReconstructionForIsoElectronIter02 + process.hltEgammaEleGsfTrackIso + process.hltEle32WPTightGsfTrackIsoFilter )
 
-process.HLTEle32WPTightGsfSequenceNew = cms.Sequence( process.HLTDoFullUnpackingEgammaEcalSequence + process.HLTPFClusteringForEgamma + process.hltEgammaCandidates + process.hltEGL1SingleEGOrFilter + process.hltEG32L1SingleEGOrEtFilter + process.hltEgammaClusterShape + process.hltEle32WPTightClusterShapeFilter + process.HLTDoLocalHcalSequence + process.HLTFastJetForEgamma + process.hltEgammaHoverE + process.hltEle32WPTightHEFilter + process.hltEgammaEcalPFClusterIso + process.hltEle32WPTightEcalIsoFilter + process.HLTPFHcalClustering + process.hltEgammaHcalPFClusterIso + process.hltEle32WPTightHcalIsoFilter + process.HLTElePixelMatchSequenceNew + process.hltEle32WPTightPixelMatchFilterNew)
+process.HLTEle32WPTightGsfSequenceNew = cms.Sequence( process.HLTDoFullUnpackingEgammaEcalSequence + process.HLTPFClusteringForEgamma + process.hltEgammaCandidates + process.hltEGL1SingleEGOrFilter + process.hltEG32L1SingleEGOrEtFilter + process.hltEgammaClusterShape + process.hltEle32WPTightClusterShapeFilter + process.HLTDoLocalHcalSequence + process.HLTFastJetForEgamma + process.hltEgammaHoverE + process.hltEle32WPTightHEFilter + process.hltEgammaEcalPFClusterIso + process.hltEle32WPTightEcalIsoFilter + process.HLTPFHcalClustering + process.hltEgammaHcalPFClusterIso + process.hltEle32WPTightHcalIsoFilter + process.HLTElePixelMatchSequenceNew) # + process.hltEle32WPTightPixelMatchFilterNew)
 #                                                      + process.hltEle32WPTightPMS2Filter + process.HLTGsfElectronSequence + process.hltEle32WPTightGsfOneOEMinusOneOPFilter + process.hltEle32WPTightGsfMissingHitsFilter + process.hltEle32WPTightGsfDetaFilter + process.hltEle32WPTightGsfDphiFilter + process.HLTTrackReconstructionForIsoElectronIter02 + process.hltEgammaEleGsfTrackIso + process.hltEle32WPTightGsfTrackIsoFilter )
 
 
