@@ -30,6 +30,31 @@
 <use name="TrackingTools/Records"/>
 <use name="TrackingTools/TrajectoryParametrization"/>
 <use name="TrackingTools/TrajectoryState"/>
+<use name="DataFormats/TrajectorySeed"/>
+<use name="Geometry/TrackerGeometryBuilder"/>
+<use name="TrackingTools/PatternTools"/>
+<use name="RecoTracker/TransientTrackingRecHit"/>
+<use name="RecoTracker/TkSeedGenerator"/>
+<use name="RecoTracker/TkSeedingLayers"/>
+<use name="TrackingTools/TransientTrackingRecHit"/>
+<use name="RecoTracker/TkMSParametrization"/>
+<use name="TrackingTools/MaterialEffects"/>
+<use name="TrackingTools/GeomPropagators"/>
+<use name="TrackingTools/KalmanUpdators"/>
+<use name="Geometry/CaloGeometry"/>
+<use name="Geometry/CaloTopology"/>
+<use name="DataFormats/CaloRecHit"/>
+<use name="CommonTools/CandAlgos"/>
+<use name="Utilities/General"/>
+<use name="clhep"/>
+<use name="RecoVertex/VertexPrimitives"/>
+<use name="RecoVertex/KalmanVertexFit"/>
+<use name="RecoVertex/KinematicFitPrimitives"/>
+<use name="RecoVertex/KinematicFit"/>
+<use name="TrackingTools/DetLayers"/>
+<use name="DataFormats/GeometryVector"/>
+<use name="DataFormats/GeometrySurface"/>
+
 <library file="*.cc" name="RecoEgammaEgammaElectronProducersPlugins">
   <flags EDM_PLUGIN="1"/>
 </library>
