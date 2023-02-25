@@ -38,11 +38,26 @@ public:
   ElectronNHitSeedProducerNew(const edm::ParameterSet&);
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const final;
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
   static BoundCylinder& barrel();
   static BoundDisk& negativeEtaEndcap();
   static BoundDisk& positiveEtaEndcap();
-  TrajectoryStateOnSurface stateAtECAL_;
 
+  static BoundCylinder* initBarrel();
+  static BoundDisk* initPositive();
+  static BoundDisk* initNegative();
+
+  static const ReferenceCountingPointer<BoundCylinder> theBarrel_;
+  static const ReferenceCountingPointer<BoundDisk> theNegativeEtaEndcap_;
+  static const ReferenceCountingPointer<BoundDisk> thePositiveEtaEndcap_;
+
+  static constexpr float epsilon = 0.001;
+  /** Hard-wired numbers defining the surfaces on which the crystal front faces lie. */
+  static constexpr float barrelRadius = 129.f;       // p81, p50, ECAL TDR
+  static constexpr float barrelHalfLength = 270.9f;  // p81, p50, ECAL TDR
+  static constexpr float endcapRadius = 171.1f;      // fig 3.26, p81, ECAL TDR
+  static constexpr float endcapZ = 320.5f;           // fig 3.26, p81, ECAL TDR
+  
 private:
  
   const edm::EDGetTokenT<TrajectorySeedCollection> initialSeedsToken_;
@@ -57,25 +72,50 @@ ElectronNHitSeedProducerNew::ElectronNHitSeedProducerNew(const edm::ParameterSet
       geomToken(esConsumes())
 {
   superClustersTokens_ = consumes(pset.getParameter<edm::InputTag>("superClusters"));
+  //const ReferenceCountingPointer<BoundCylinder> ElectronNHitSeedProducerNew::
+  //  ElectronNHitSeedProducerNew::theBarrel_ = initBarrel();
+  //const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::
+  //ElectronNHitSeedProducerNew::thePositiveEtaEndcap_ = initPositive();
+  //const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::
+  //ElectronNHitSeedProducerNew::theNegativeEtaEndcap_ = initNegative();
 
 }
 
-BoundCylinder& ElectronNHitSeedProducerNew::barrel() {
-  static const ReferenceCountingPointer<BoundCylinder> theBarrel_;
-  return *theBarrel_;
+BoundCylinder& ElectronNHitSeedProducerNew::barrel() { return *ElectronNHitSeedProducerNew::theBarrel_; }
+BoundDisk& ElectronNHitSeedProducerNew::negativeEtaEndcap() { return *ElectronNHitSeedProducerNew::theNegativeEtaEndcap_; }
+BoundDisk& ElectronNHitSeedProducerNew::positiveEtaEndcap() { return *ElectronNHitSeedProducerNew::thePositiveEtaEndcap_; }
+
+BoundCylinder* ElectronNHitSeedProducerNew::initBarrel() {
+  Surface::RotationType rot;  // unit rotation matrix
+  return new Cylinder(
+      barrelRadius,
+      Surface::PositionType(0, 0, 0),
+      rot,
+      new SimpleCylinderBounds(barrelRadius - epsilon, barrelRadius + epsilon, -barrelHalfLength, barrelHalfLength));
 }
 
-BoundDisk& ElectronNHitSeedProducerNew::negativeEtaEndcap() {
-  static const ReferenceCountingPointer<BoundDisk> theNegativeEtaEndcap_;
-  return *theNegativeEtaEndcap_;
+const ReferenceCountingPointer<BoundCylinder>  ElectronNHitSeedProducerNew::theBarrel_ = initBarrel(); 
+
+BoundDisk* ElectronNHitSeedProducerNew::initPositive() {
+  Surface::RotationType rot;  // unit rotation matrix
+  return new BoundDisk(
+      Surface::PositionType(0, 0, endcapZ),
+      rot,
+      new SimpleDiskBounds(0, endcapRadius, -epsilon, epsilon));
 }
 
-BoundDisk& ElectronNHitSeedProducerNew::positiveEtaEndcap() {
-  static const ReferenceCountingPointer<BoundDisk> thePositiveEtaEndcap_;
-  return *thePositiveEtaEndcap_;
+
+BoundDisk* ElectronNHitSeedProducerNew::initNegative() {
+  Surface::RotationType rot;  // unit rotation matrix
+  return new BoundDisk(
+      Surface::PositionType(0, 0, -endcapZ),
+      rot,
+      new SimpleDiskBounds(0, endcapRadius, -epsilon, epsilon));
 }
 
-  
+const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::thePositiveEtaEndcap_ = initPositive();
+const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::theNegativeEtaEndcap_ = initNegative();   
+
 void ElectronNHitSeedProducerNew::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   edm::ParameterSetDescription desc;
   desc.add<edm::InputTag>("initialSeeds", {"hltElePixelSeedsCombined"});
@@ -90,7 +130,7 @@ void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, con
 
   GlobalPoint center(0.0, 0.0, 0.0);
   float theMagField = magField.inTesla(center).mag();
-  std::cout << "theMagField = " << theMagField << std::endl;
+  //  std::cout << "theMagField = " << theMagField << std::endl;
 
   PropagatorWithMaterial forwardPropagator_ =  PropagatorWithMaterial(alongMomentum, 0.000511, &magField);
 
@@ -100,12 +140,17 @@ void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, con
     int nHitInSeed=initialSeedRef.nHits();
     PTrajectoryStateOnDet state1 = initialSeedRef.startingState();
     DetId detId1(state1.detId());
-    const TrajectoryStateOnSurface tsos1 =
+    TrajectoryStateOnSurface tsos1 =
           trajectoryStateTransform::transientState(state1, &(theG->idToDet(detId1)->surface()), &iSetup.getData(magFieldToken_));
 
     std::cout << "tsos valid? " << tsos1.isValid() << std::endl;
-    //stateAtECAL_ =
-    //   std::cout << " propagated state valid? " <<   (forwardPropagator_.propagate(tsos1, barrel())).isValid() << std::endl;
+    TrajectoryStateOnSurface stateAtECAL_ = forwardPropagator_.propagate(tsos1, ElectronNHitSeedProducerNew::barrel());
+    //    std::cout << " propagated state valid? " <<   (forwardPropagator_.propagate(tsos1, ElectronNHitSeedProducerNew::initBarrel())).isValid() << std::endl;
+
+    if (stateAtECAL_.isValid()) {
+      std::cout << "stateAtECAL eta" << stateAtECAL_.globalPosition().eta() << std::endl;
+    }
+
 
     // Would we need individual hit info from the initial seeds?
     //for (int i=0; i<nHitInSeed; i++) {
