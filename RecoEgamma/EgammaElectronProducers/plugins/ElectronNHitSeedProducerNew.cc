@@ -8,12 +8,12 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Framework/interface/ESProducer.h"
 
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/GeometrySurface/interface/SimpleCylinderBounds.h"
 #include "DataFormats/GeometrySurface/interface/SimpleDiskBounds.h"
 #include "DataFormats/GeometrySurface/interface/Cylinder.h"
 #include "DataFormats/GeometrySurface/interface/BoundCylinder.h"
 #include "DataFormats/GeometrySurface/interface/BoundDisk.h"
-
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
@@ -72,13 +72,6 @@ ElectronNHitSeedProducerNew::ElectronNHitSeedProducerNew(const edm::ParameterSet
       geomToken(esConsumes())
 {
   superClustersTokens_ = consumes(pset.getParameter<edm::InputTag>("superClusters"));
-  //const ReferenceCountingPointer<BoundCylinder> ElectronNHitSeedProducerNew::
-  //  ElectronNHitSeedProducerNew::theBarrel_ = initBarrel();
-  //const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::
-  //ElectronNHitSeedProducerNew::thePositiveEtaEndcap_ = initPositive();
-  //const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::
-  //ElectronNHitSeedProducerNew::theNegativeEtaEndcap_ = initNegative();
-
 }
 
 BoundCylinder& ElectronNHitSeedProducerNew::barrel() { return *ElectronNHitSeedProducerNew::theBarrel_; }
@@ -93,8 +86,6 @@ BoundCylinder* ElectronNHitSeedProducerNew::initBarrel() {
       rot,
       new SimpleCylinderBounds(barrelRadius - epsilon, barrelRadius + epsilon, -barrelHalfLength, barrelHalfLength));
 }
-
-const ReferenceCountingPointer<BoundCylinder>  ElectronNHitSeedProducerNew::theBarrel_ = initBarrel(); 
 
 BoundDisk* ElectronNHitSeedProducerNew::initPositive() {
   Surface::RotationType rot;  // unit rotation matrix
@@ -113,6 +104,7 @@ BoundDisk* ElectronNHitSeedProducerNew::initNegative() {
       new SimpleDiskBounds(0, endcapRadius, -epsilon, epsilon));
 }
 
+const ReferenceCountingPointer<BoundCylinder>  ElectronNHitSeedProducerNew::theBarrel_ = initBarrel(); 
 const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::thePositiveEtaEndcap_ = initPositive();
 const ReferenceCountingPointer<BoundDisk> ElectronNHitSeedProducerNew::theNegativeEtaEndcap_ = initNegative();   
 
@@ -125,6 +117,10 @@ void ElectronNHitSeedProducerNew::fillDescriptions(edm::ConfigurationDescription
 
 void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
 
+  std::cout << "\n\n This event has following SCs \n";
+  for (auto& superClusRef : iEvent.get(superClustersTokens_)) {
+    std::cout << "SC et " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " eta " << superClusRef->position().eta() << std::endl;  
+  }
   auto const& magField = iSetup.getData(magFieldToken_);
   const TrackerGeometry* theG = &iSetup.getData(geomToken);
 
@@ -134,23 +130,82 @@ void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, con
 
   PropagatorWithMaterial forwardPropagator_ =  PropagatorWithMaterial(alongMomentum, 0.000511, &magField);
 
- 
+  std::cout << " ** this event has " << iEvent.get(initialSeedsToken_).size() << " initial seeds \n";
+  std::cout << " and " << iEvent.get(superClustersTokens_).size() << " superclusters \n";
+
+  //LOOP on initial seeds
+  int iseed=0; 
   for (auto& initialSeedRef : iEvent.get(initialSeedsToken_)) {
-    std::cout << "nhit in seed " << initialSeedRef.nHits() << std::endl;
+    iseed++;
+    //    std::cout << "nhit in seed " << initialSeedRef.nHits() << std::endl;
     int nHitInSeed=initialSeedRef.nHits();
     PTrajectoryStateOnDet state1 = initialSeedRef.startingState();
     DetId detId1(state1.detId());
     TrajectoryStateOnSurface tsos1 =
           trajectoryStateTransform::transientState(state1, &(theG->idToDet(detId1)->surface()), &iSetup.getData(magFieldToken_));
 
-    std::cout << "tsos valid? " << tsos1.isValid() << std::endl;
+    //std::cout << "tsos valid? " << tsos1.isValid() << std::endl;
     TrajectoryStateOnSurface stateAtECAL_ = forwardPropagator_.propagate(tsos1, ElectronNHitSeedProducerNew::barrel());
     //    std::cout << " propagated state valid? " <<   (forwardPropagator_.propagate(tsos1, ElectronNHitSeedProducerNew::initBarrel())).isValid() << std::endl;
 
-    if (stateAtECAL_.isValid()) {
-      std::cout << "stateAtECAL eta" << stateAtECAL_.globalPosition().eta() << std::endl;
-    }
+    if (!stateAtECAL_.isValid() || (stateAtECAL_.isValid() && fabs(stateAtECAL_.globalPosition().eta()) > 1.479)) {
+      if (tsos1.globalPosition().eta() > 0.) {
+        stateAtECAL_ = forwardPropagator_.propagate(tsos1, positiveEtaEndcap());
 
+      } else {
+        stateAtECAL_ = forwardPropagator_.propagate(tsos1, negativeEtaEndcap());
+      }
+    }
+    
+    if (!stateAtECAL_.isValid()) continue;
+    //     std::cout << "stateAtECAL_ not valid!!!!!!!!!" << std::endl;
+      //std::cout << "stateAtECAL eta" << stateAtECAL_.globalPosition().eta() << std::endl;
+    //}
+    else {
+      //     std::cout << "\n\ntsos1 eta/phi/pt " << tsos1.globalPosition().eta() << " / " << tsos1.globalPosition().phi()
+      //	<< " / " << tsos1.globalMomentum().perp() << std::endl;
+
+      //std::cout << "ecal_ eta/phi/pt " << stateAtECAL_.globalPosition().eta() << " / " << stateAtECAL_.globalPosition().phi()
+      //	<< " / " << stateAtECAL_.globalMomentum().perp() << std::endl;
+
+
+      
+      //std::cout << "stateAtECAL VALID :-) the eta is " << stateAtECAL_.globalPosition().eta() << std::endl;
+      int isc=0;
+      for (auto& superClusRef : iEvent.get(superClustersTokens_)) {
+	isc++;
+	//std::cout << "\n\n SC et " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " eta " << superClusRef->position().eta() << std::endl;
+	float deltar2 =
+	  reco::deltaR2(stateAtECAL_.globalPosition().eta(), stateAtECAL_.globalPosition().phi(), superClusRef->seed()->position().eta(), superClusRef->position().phi());	float pTratio= superClusRef->energy() / std::cosh(superClusRef->position().eta() ) / stateAtECAL_.globalMomentum().perp();
+
+	// SC pt<50 GeV -> eventually these will go to config file, just testing now..
+	if (superClusRef->energy() / std::cosh(superClusRef->position().eta()) < 50.0) {
+	  if (deltar2<0.0005 && pTratio>0.5 && pTratio<1.6) { // these cuts need optimisation
+	    std::cout << "the seed of indx " << iseed <<
+	      " match a SC with indx " << isc << " and pt " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " with dR2=" << deltar2
+		      << " and pTratio=" << pTratio << std::endl;
+	    //std::cout << "Seed eta/phi at ECAL surface " << stateAtECAL_.globalPosition().eta()
+	    //	    << " / " << stateAtECAL_.globalPosition().phi() << std::endl;
+	    //std::cout << "SC eta/phi " << superClusRef->position().eta() << " / " << superClusRef->position().phi() << std::endl;
+	    //std::cout << "SC ET = " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " seed ET=" <<
+	    //  stateAtECAL_.globalMomentum().perp() << std::endl;
+	  }
+	} // low pt ends
+	else { // high pt starts
+	  // no pTratio cut for high pT
+	  if (deltar2<0.0001) {
+            std::cout << "the seed of indx " << iseed <<
+              " match a SC with indx " << isc << " and pt " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " with dR2=" << deltar2
+                      << " and pTratio=" << pTratio << std::endl;
+            //std::cout << "Seed eta/phi at ECAL surface " << stateAtECAL_.globalPosition().eta()
+	    //      << " / " << stateAtECAL_.globalPosition().phi() << std::endl;
+	    //std::cout << "SC eta/phi " << superClusRef->position().eta() << " / " << superClusRef->position().phi() << std::endl;
+	    //std::cout << "SC ET = " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " seed ET=" <<                                          
+           //  stateAtECAL_.globalMomentum().perp() << std::endl;                                                                                                          
+          }
+	}
+      }
+    }
 
     // Would we need individual hit info from the initial seeds?
     //for (int i=0; i<nHitInSeed; i++) {
