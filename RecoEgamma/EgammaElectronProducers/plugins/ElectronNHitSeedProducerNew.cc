@@ -7,7 +7,6 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "FWCore/Framework/interface/ESProducer.h"
-
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/GeometrySurface/interface/SimpleCylinderBounds.h"
 #include "DataFormats/GeometrySurface/interface/SimpleDiskBounds.h"
@@ -32,12 +31,12 @@
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/DetLayers/interface/BarrelDetLayer.h"
 
-
 class ElectronNHitSeedProducerNew : public edm::global::EDProducer<> {
 public:
   ElectronNHitSeedProducerNew(const edm::ParameterSet&);
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const final;
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+  reco::ElectronSeedCollection acceptThisSeed(TrajectorySeed, const edm::Ref<std::vector<reco::SuperCluster> >, reco::ElectronSeedCollection) const ;
 
   static BoundCylinder& barrel();
   static BoundDisk& negativeEtaEndcap();
@@ -62,13 +61,16 @@ private:
  
   const edm::EDGetTokenT<TrajectorySeedCollection> initialSeedsToken_;
   edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> magFieldToken_;
+  const edm::EDPutTokenT<reco::ElectronSeedCollection> putToken_;
   const edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> geomToken;
   edm::EDGetTokenT<std::vector<reco::SuperClusterRef>> superClustersTokens_;
+  
 };
 
 ElectronNHitSeedProducerNew::ElectronNHitSeedProducerNew(const edm::ParameterSet& pset)
   :   initialSeedsToken_(consumes(pset.getParameter<edm::InputTag>("initialSeeds"))),
-      magFieldToken_(esConsumes()),
+      magFieldToken_(esConsumes()), // Is it constant magnetic field?
+      putToken_{produces<reco::ElectronSeedCollection>()},
       geomToken(esConsumes())
 {
   superClustersTokens_ = consumes(pset.getParameter<edm::InputTag>("superClusters"));
@@ -116,37 +118,23 @@ void ElectronNHitSeedProducerNew::fillDescriptions(edm::ConfigurationDescription
 }
 
 void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
-
-  std::cout << "\n\n This event has following SCs \n";
-  for (auto& superClusRef : iEvent.get(superClustersTokens_)) {
-    std::cout << "SC et " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " eta " << superClusRef->position().eta() << std::endl;  
-  }
+  std::cout << "\n\n NEW EVENT \n " ;
+  reco::ElectronSeedCollection eleSeeds{};
+  
   auto const& magField = iSetup.getData(magFieldToken_);
   const TrackerGeometry* theG = &iSetup.getData(geomToken);
 
-  GlobalPoint center(0.0, 0.0, 0.0);
-  float theMagField = magField.inTesla(center).mag();
-  //  std::cout << "theMagField = " << theMagField << std::endl;
-
   PropagatorWithMaterial forwardPropagator_ =  PropagatorWithMaterial(alongMomentum, 0.000511, &magField);
 
-  std::cout << " ** this event has " << iEvent.get(initialSeedsToken_).size() << " initial seeds \n";
-  std::cout << " and " << iEvent.get(superClustersTokens_).size() << " superclusters \n";
-
   //LOOP on initial seeds
-  int iseed=0; 
   for (auto& initialSeedRef : iEvent.get(initialSeedsToken_)) {
-    iseed++;
-    //    std::cout << "nhit in seed " << initialSeedRef.nHits() << std::endl;
-    int nHitInSeed=initialSeedRef.nHits();
     PTrajectoryStateOnDet state1 = initialSeedRef.startingState();
     DetId detId1(state1.detId());
     TrajectoryStateOnSurface tsos1 =
           trajectoryStateTransform::transientState(state1, &(theG->idToDet(detId1)->surface()), &iSetup.getData(magFieldToken_));
-
-    //std::cout << "tsos valid? " << tsos1.isValid() << std::endl;
+    if (!tsos1.isValid()) continue;
+      
     TrajectoryStateOnSurface stateAtECAL_ = forwardPropagator_.propagate(tsos1, ElectronNHitSeedProducerNew::barrel());
-    //    std::cout << " propagated state valid? " <<   (forwardPropagator_.propagate(tsos1, ElectronNHitSeedProducerNew::initBarrel())).isValid() << std::endl;
 
     if (!stateAtECAL_.isValid() || (stateAtECAL_.isValid() && fabs(stateAtECAL_.globalPosition().eta()) > 1.479)) {
       if (tsos1.globalPosition().eta() > 0.) {
@@ -157,65 +145,88 @@ void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, con
       }
     }
     
-    if (!stateAtECAL_.isValid()) continue;
-    //     std::cout << "stateAtECAL_ not valid!!!!!!!!!" << std::endl;
-      //std::cout << "stateAtECAL eta" << stateAtECAL_.globalPosition().eta() << std::endl;
-    //}
-    else {
-      //     std::cout << "\n\ntsos1 eta/phi/pt " << tsos1.globalPosition().eta() << " / " << tsos1.globalPosition().phi()
-      //	<< " / " << tsos1.globalMomentum().perp() << std::endl;
-
-      //std::cout << "ecal_ eta/phi/pt " << stateAtECAL_.globalPosition().eta() << " / " << stateAtECAL_.globalPosition().phi()
-      //	<< " / " << stateAtECAL_.globalMomentum().perp() << std::endl;
-
-
-      
-      //std::cout << "stateAtECAL VALID :-) the eta is " << stateAtECAL_.globalPosition().eta() << std::endl;
-      int isc=0;
-      for (auto& superClusRef : iEvent.get(superClustersTokens_)) {
-	isc++;
-	//std::cout << "\n\n SC et " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " eta " << superClusRef->position().eta() << std::endl;
-	float deltar2 =
-	  reco::deltaR2(stateAtECAL_.globalPosition().eta(), stateAtECAL_.globalPosition().phi(), superClusRef->seed()->position().eta(), superClusRef->position().phi());	float pTratio= superClusRef->energy() / std::cosh(superClusRef->position().eta() ) / stateAtECAL_.globalMomentum().perp();
-
-	// SC pt<50 GeV -> eventually these will go to config file, just testing now..
-	if (superClusRef->energy() / std::cosh(superClusRef->position().eta()) < 50.0) {
-	  if (deltar2<0.0005 && pTratio>0.5 && pTratio<1.6) { // these cuts need optimisation
-	    std::cout << "the seed of indx " << iseed <<
-	      " match a SC with indx " << isc << " and pt " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " with dR2=" << deltar2
-		      << " and pTratio=" << pTratio << std::endl;
-	    //std::cout << "Seed eta/phi at ECAL surface " << stateAtECAL_.globalPosition().eta()
-	    //	    << " / " << stateAtECAL_.globalPosition().phi() << std::endl;
-	    //std::cout << "SC eta/phi " << superClusRef->position().eta() << " / " << superClusRef->position().phi() << std::endl;
-	    //std::cout << "SC ET = " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " seed ET=" <<
-	    //  stateAtECAL_.globalMomentum().perp() << std::endl;
-	  }
-	} // low pt ends
-	else { // high pt starts
-	  // no pTratio cut for high pT
-	  if (deltar2<0.0001) {
-            std::cout << "the seed of indx " << iseed <<
-              " match a SC with indx " << isc << " and pt " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " with dR2=" << deltar2
-                      << " and pTratio=" << pTratio << std::endl;
-            //std::cout << "Seed eta/phi at ECAL surface " << stateAtECAL_.globalPosition().eta()
-	    //      << " / " << stateAtECAL_.globalPosition().phi() << std::endl;
-	    //std::cout << "SC eta/phi " << superClusRef->position().eta() << " / " << superClusRef->position().phi() << std::endl;
-	    //std::cout << "SC ET = " << superClusRef->energy() / std::cosh(superClusRef->position().eta() ) << " seed ET=" <<                                          
-           //  stateAtECAL_.globalMomentum().perp() << std::endl;                                                                                                          
-          }
-	}
-      }
+    if (!stateAtECAL_.isValid()) {
+      continue;
     }
+    else { //stateAtECAL_ is valid
+      for (auto& superClusRef : iEvent.get(superClustersTokens_)) {
+	//	std::cout << "nClus " << superClusRef->clustersSize() << std::endl;
+	int nClus=superClusRef->clustersSize();
+	float sc_et = superClusRef->energy() / std::cosh(superClusRef->position().eta());
+	double deltar2 =
+	  reco::deltaR2(stateAtECAL_.globalPosition().eta(),
+			stateAtECAL_.globalPosition().phi(), superClusRef->seed()->position().eta(), superClusRef->position().phi());
+	double pTratio= sc_et / stateAtECAL_.globalMomentum().perp();
 
-    // Would we need individual hit info from the initial seeds?
-    //for (int i=0; i<nHitInSeed; i++) {
-    //auto const& recHit = *(initialSeedRef.recHits().begin() + i);
-    //std::cout << "hit valid? " <<  recHit.isValid() << std::endl;
-    //std::cout << "hit " << i << " pos X "  << recHit.globalPosition().x()
-    //	<< std::endl;  
-    //}
-  }
-  //  iEvent.emplace(putToken_, std::move(eleSeeds));
+	//  eventually these hard-coded values will go to config file, just testing now..
+
+	//	if (nClus==1) { //very tight cuts can be applied
+	  if (sc_et <= 20.0) { //low pT
+	    if (deltar2<0.0001 && pTratio>0.8 && pTratio<1.2) { // these cuts need optimisation
+	      std::cout << "accept \n";
+	      eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
+	    }
+	  }
+	  //////
+	  else if (sc_et>20.0 && sc_et<=50.0) { //medium pT 
+	    // relax pTratio cut and relax deltaR cut
+	    if (deltar2<0.0001 && pTratio>0.4 && pTratio<1.6) {
+	      std::cout << "accept \n";
+	      eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
+	    }
+	  }
+	  //////
+	  else if (sc_et>50.0) { //high pT
+	    // no pTratio cut
+	    if (deltar2<0.0001 ) {
+	      std::cout << "accept \n";
+	      eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
+	    }
+	  }
+	  //} //nclus==1
+	  /*
+	else { //nclus>1 --> relax all cuts
+	  if (sc_et <= 20.0) {
+	    if (deltar2<0.0001 && pTratio>0.8 && pTratio<1.2) { // these cuts need optimisation
+	      acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
+	    }
+	  }
+	  //////
+	  else if (sc_et>20.0 && sc_et<=50.0) { 
+	    // relax pTratio cut and relax deltaR cut
+	    if (deltar2<0.0001 && pTratio>0.4 && pTratio<1.6) {
+	      acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
+	    }
+	  }
+	  //////
+	  else if (sc_et>50.0) { 
+	    // no pTratio cut
+	    if (deltar2<0.0001 ) {
+	      acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
+	    }
+	  }
+	  
+	  }*/
+	/////////
+	/////////
+      } // loop over SC ends
+    }
+  } // Loop on initial seed ends
+  std::cout << "eleSeeds size " << eleSeeds.size() << std::endl;
+  iEvent.emplace(putToken_, std::move(eleSeeds));
+}
+
+reco::ElectronSeedCollection ElectronNHitSeedProducerNew::acceptThisSeed(
+						 TrajectorySeed initialSeedRef, const edm::Ref<std::vector<reco::SuperCluster> > superClusRef,
+						 reco::ElectronSeedCollection eleSeeds) const {
+  std::cout << "BEGIN: eleSeeds size in acceptThisSeed function " << eleSeeds.size() << std::endl;
+  reco::ElectronSeed eleSeed(initialSeedRef);
+  reco::ElectronSeed::CaloClusterRef caloClusRef(superClusRef);
+  eleSeed.setCaloCluster(caloClusRef);
+  eleSeed.setCaloCluster(caloClusRef);
+  eleSeeds.push_back(eleSeed); // accept this initial seed as final seed
+  std::cout << "END: eleSeeds size in acceptThisSeed function " << eleSeeds.size() << std::endl;
+  return eleSeeds;
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
