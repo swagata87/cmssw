@@ -119,7 +119,7 @@ void ElectronNHitSeedProducerNew::fillDescriptions(edm::ConfigurationDescription
 }
 
 void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, const edm::EventSetup& iSetup) const {
-  std::cout << "\n\n NEW EVENT \n " ;
+  //std::cout << "\n\n NEW EVENT \n " ;
   reco::ElectronSeedCollection eleSeeds{};
   
   auto const& magField = iSetup.getData(magFieldToken_);
@@ -151,8 +151,7 @@ void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, con
     }
     else { //stateAtECAL_ is valid
       for (auto& superClusRef : iEvent.get(superClustersTokens_)) {
-	//	std::cout << "nClus " << superClusRef->clustersSize() << std::endl;
-	int nClus=superClusRef->clustersSize();
+	//	int nClus=superClusRef->clustersSize(); IF needed separate cuts for different nClus
 	float sc_et = superClusRef->energy() / std::cosh(superClusRef->position().eta());
 	double deltar2 =
 	  reco::deltaR2(stateAtECAL_.globalPosition().eta(),
@@ -160,73 +159,41 @@ void ElectronNHitSeedProducerNew::produce(edm::StreamID, edm::Event& iEvent, con
 	double pTratio= sc_et / stateAtECAL_.globalMomentum().perp();
 
 	//  eventually these hard-coded values will go to config file, just testing now..
-
-	//	if (nClus==1) { //very tight cuts can be applied
-	  if (sc_et <= 20.0) { //low pT
-	    if (deltar2<0.0001 && pTratio>0.8 && pTratio<1.2) { // these cuts need optimisation
-	      std::cout << "accept \n";
-	      eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
-	    }
+	if (sc_et <= 20.0) { //low pT
+	  if (deltar2<1E-5 && pTratio>0.8 && pTratio<1.2) { // these cuts need optimisation
+	    eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
 	  }
-	  //////
-	  else if (sc_et>20.0 && sc_et<=50.0) { //medium pT 
-	    // relax pTratio cut and relax deltaR cut
-	    if (deltar2<0.0001 && pTratio>0.4 && pTratio<1.6) {
-	      std::cout << "accept \n";
-	      eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
-	    }
+	}
+	//////
+	else if (sc_et>20.0 && sc_et<=50.0) { //medium pT -> relax pTratio cut 
+	  if (deltar2<1E-5 && pTratio>0.4 && pTratio<1.6) {
+	    eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
 	  }
-	  //////
-	  else if (sc_et>50.0) { //high pT
-	    // no pTratio cut
-	    if (deltar2<0.0001 ) {
-	      std::cout << "accept \n";
-	      eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
-	    }
+	}
+	//////
+	else if (sc_et>50.0) { //high pT -> no pTratio cut
+	  if (deltar2<1E-4 ) {
+	    eleSeeds=acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
 	  }
-	  //} //nclus==1
-	  /*
-	else { //nclus>1 --> relax all cuts
-	  if (sc_et <= 20.0) {
-	    if (deltar2<0.0001 && pTratio>0.8 && pTratio<1.2) { // these cuts need optimisation
-	      acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
-	    }
-	  }
-	  //////
-	  else if (sc_et>20.0 && sc_et<=50.0) { 
-	    // relax pTratio cut and relax deltaR cut
-	    if (deltar2<0.0001 && pTratio>0.4 && pTratio<1.6) {
-	      acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
-	    }
-	  }
-	  //////
-	  else if (sc_et>50.0) { 
-	    // no pTratio cut
-	    if (deltar2<0.0001 ) {
-	      acceptThisSeed( initialSeedRef,  superClusRef,  eleSeeds);
-	    }
-	  }
-	  
-	  }*/
-	/////////
-	/////////
+	}
+	//////////////////////
       } // loop over SC ends
     }
   } // Loop on initial seed ends
-  std::cout << "eleSeeds size " << eleSeeds.size() << std::endl;
+  std::cout << "New: eleSeeds size " << eleSeeds.size() << std::endl;
   iEvent.emplace(putToken_, std::move(eleSeeds));
 }
 
 reco::ElectronSeedCollection ElectronNHitSeedProducerNew::acceptThisSeed(
 						 TrajectorySeed initialSeedRef, const edm::Ref<std::vector<reco::SuperCluster> > superClusRef,
 						 reco::ElectronSeedCollection eleSeeds) const {
-  std::cout << "BEGIN: eleSeeds size in acceptThisSeed function " << eleSeeds.size() << std::endl;
+  //std::cout << "BEGIN: eleSeeds size in acceptThisSeed function " << eleSeeds.size() << std::endl;
   reco::ElectronSeed eleSeed(initialSeedRef);
   reco::ElectronSeed::CaloClusterRef caloClusRef(superClusRef);
   eleSeed.setCaloCluster(caloClusRef);
   eleSeed.setCaloCluster(caloClusRef);
   eleSeeds.push_back(eleSeed); // accept this initial seed as final seed
-  std::cout << "END: eleSeeds size in acceptThisSeed function " << eleSeeds.size() << std::endl;
+  //std::cout << "END: eleSeeds size in acceptThisSeed function " << eleSeeds.size() << std::endl;
   return eleSeeds;
 }
 
