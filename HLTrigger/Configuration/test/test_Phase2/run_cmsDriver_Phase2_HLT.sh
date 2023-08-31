@@ -1,5 +1,9 @@
 #!/bin/bash
 
+git cms-addpkg HLTrigger/HLTfilters
+git cms-addpkg DataFormats/HLTReco
+git cms-addpkg HLTrigger/HLTcore
+
 cmsDriver.py Phase2 -s HLT:75e33 --processName=HLTX \
 --conditions auto:phase2_realistic_T21 \
 --geometry Extended2026D95 \
