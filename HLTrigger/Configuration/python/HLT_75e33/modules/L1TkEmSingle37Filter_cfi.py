@@ -17,7 +17,9 @@ l1tTkEmSingle37Filter = cms.EDFilter("L1TTkEmFilter",
         endcap = cms.vdouble(3.17445, 1.13219, 0.0)
     ),
     TrkIsolation = cms.vdouble(99999.0, 99999.0),
-    inputTag1 = cms.InputTag("l1tLayer1EG","L1TkEmEB"),
-    inputTag2 = cms.InputTag("l1tLayer1EG","L1TkEmEE"),
+    #inputTag1 = cms.InputTag("l1tLayer1EG","L1TkEmEB"),
+    #inputTag2 = cms.InputTag("l1tLayer1EG","L1TkEmEE"),
+    inputTag1 = cms.InputTag("l1tLayer2EG","L1CtTkEm"),
+    inputTag2 = cms.InputTag(""),
     saveTags = cms.bool(True)
 )

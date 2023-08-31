@@ -155,6 +155,7 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
   }
 
   // Loop over second collection. Notice we don't reset ntrkEm
+  if(tkEms2) {
   atrkEms = tkEms2->begin();
   otrkEms = tkEms2->end();
   for (itkEm = atrkEms; itkEm != otrkEms; itkEm++) {
@@ -182,7 +183,7 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
       l1t::TkEmRef ref2(l1t::TkEmRef(tkEms2, distance(atrkEms, itkEm)));
       filterproduct.addObject(trigger::TriggerObjectType::TriggerL1TkEm, ref2);
     }
-  }
+  }}
 
   // return with final filter decision
   const bool accept(ntrkEm >= min_N_);
