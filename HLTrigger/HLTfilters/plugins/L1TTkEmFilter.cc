@@ -132,10 +132,14 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
     bool passIsolation(false);
 
     if (applyQual1_) {
-      if (qual1IsMask_)
-        passQuality = (itkEm->EGRef()->hwQual() & quality1_);
-      else
-        passQuality = (itkEm->EGRef()->hwQual() == quality1_);
+      if (qual1IsMask_) {
+        //passQuality = (itkEm->EGRef()->hwQual() & quality1_);
+        passQuality = (itkEm->hwQual() & quality1_);
+      }
+      else {
+        //passQuality = (itkEm->EGRef()->hwQual() == quality1_);
+        passQuality = (itkEm->hwQual() == quality1_);
+      }
     } else
       passQuality = true;
 
@@ -164,10 +168,14 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
     bool passIsolation(false);
 
     if (applyQual2_) {
-      if (qual2IsMask_)
-        passQuality = (itkEm->EGRef()->hwQual() & quality2_);
-      else
-        passQuality = (itkEm->EGRef()->hwQual() == quality2_);
+      if (qual2IsMask_) {
+        //passQuality = (itkEm->EGRef()->hwQual() & quality2_);
+        passQuality = (itkEm->hwQual() & quality1_);
+      }
+      else {
+        //passQuality = (itkEm->EGRef()->hwQual() == quality2_);
+        passQuality = (itkEm->hwQual() == quality1_);
+      }
     } else
       passQuality = true;
 

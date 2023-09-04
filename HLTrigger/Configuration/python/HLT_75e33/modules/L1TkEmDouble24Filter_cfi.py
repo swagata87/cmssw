@@ -9,17 +9,17 @@ l1tTkEmDouble24Filter = cms.EDFilter("L1TTkEmFilter",
     MinN = cms.int32(2),
     MinPt = cms.double(24.0),
     Qual1IsMask = cms.bool(True),
-    Qual2IsMask = cms.bool(False),
+    Qual2IsMask = cms.bool(True),
     Quality1 = cms.int32(2),
-    Quality2 = cms.int32(5),
+    Quality2 = cms.int32(4),
     Scalings = cms.PSet(
         barrel = cms.vdouble(2.6604, 1.06077, 0.0),
         endcap = cms.vdouble(3.17445, 1.13219, 0.0)
     ),
     TrkIsolation = cms.vdouble(99999.0, 99999.0),
-    #inputTag1 = cms.InputTag("l1tLayer1EG","L1TkEmEB"),
-    #inputTag2 = cms.InputTag("l1tLayer1EG","L1TkEmEE"),
-    inputTag1 = cms.InputTag("l1tLayer2EG","L1CtTkEm"),
-    inputTag2 = cms.InputTag(""),
+    inputTag1 = cms.InputTag("l1tLayer1EG","L1TkEmEB"),
+    inputTag2 = cms.InputTag("l1tLayer1EG","L1TkEmEE"),
+    #inputTag1 = cms.InputTag("l1tLayer2EG","L1CtTkEm"),
+    #inputTag2 = cms.InputTag(""),
     saveTags = cms.bool(True)
 )

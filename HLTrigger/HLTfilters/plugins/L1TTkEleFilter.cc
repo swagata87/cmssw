@@ -133,9 +133,9 @@ bool L1TTkEleFilter::hltFilter(edm::Event& iEvent,
 
     if (applyQual1_) {
       if (qual1IsMask_)
-        passQuality = (itkEle->EGRef()->hwQual() & quality1_);
+        passQuality = (itkEle->hwQual() & quality1_);
       else
-        passQuality = (itkEle->EGRef()->hwQual() == quality1_);
+        passQuality = (itkEle->hwQual() == quality1_);
     } else
       passQuality = true;
 
@@ -166,9 +166,9 @@ bool L1TTkEleFilter::hltFilter(edm::Event& iEvent,
 
     if (applyQual2_) {
       if (qual2IsMask_)
-        passQuality = (itkEle->EGRef()->hwQual() & quality2_);
+        passQuality = (itkEle->hwQual() & quality1_);
       else
-        passQuality = (itkEle->EGRef()->hwQual() == quality2_);
+        passQuality = (itkEle->hwQual() == quality2_);
     } else
       passQuality = true;
 
