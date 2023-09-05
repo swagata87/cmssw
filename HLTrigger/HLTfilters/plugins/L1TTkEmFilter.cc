@@ -170,11 +170,11 @@ bool L1TTkEmFilter::hltFilter(edm::Event& iEvent,
     if (applyQual2_) {
       if (qual2IsMask_) {
         //passQuality = (itkEm->EGRef()->hwQual() & quality2_);
-        passQuality = (itkEm->hwQual() & quality1_);
+        passQuality = (itkEm->hwQual() & quality2_);
       }
       else {
         //passQuality = (itkEm->EGRef()->hwQual() == quality2_);
-        passQuality = (itkEm->hwQual() == quality1_);
+        passQuality = (itkEm->hwQual() == quality2_);
       }
     } else
       passQuality = true;
