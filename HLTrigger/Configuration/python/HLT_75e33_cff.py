@@ -232,16 +232,16 @@ fragment.load("HLTrigger/Configuration/HLT_75e33/paths/HLTAnalyzerEndpath_cff")
 
 fragment.schedule = cms.Schedule(*[
 
-    #fragment.L1T_SinglePFPuppiJet230off,
-    #fragment.L1T_PFPuppiHT450off,
-    #fragment.L1T_PFPuppiMET220off,
+    fragment.L1T_SinglePFPuppiJet230off,
+    fragment.L1T_PFPuppiHT450off,
+    fragment.L1T_PFPuppiMET220off,
 
     fragment.HLT_AK4PFPuppiJet520,
     fragment.HLT_PFPuppiHT1070,
     fragment.HLT_PFPuppiMETTypeOne140_PFPuppiMHT140,
 
-    #fragment.L1T_PFHT400PT30_QuadPFPuppiJet_70_55_40_40_2p4,
-    #fragment.L1T_DoublePFPuppiJets112_2p4_DEta1p6,
+    fragment.L1T_PFHT400PT30_QuadPFPuppiJet_70_55_40_40_2p4,
+    fragment.L1T_DoublePFPuppiJets112_2p4_DEta1p6,
 
     fragment.HLT_PFHT330PT30_QuadPFPuppiJet_75_60_45_40_TriplePFPuppiBTagDeepCSV_2p4,
     fragment.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepCSV_2p4,
@@ -250,9 +250,9 @@ fragment.schedule = cms.Schedule(*[
     fragment.HLT_PFHT200PT30_QuadPFPuppiJet_70_40_30_30_TriplePFPuppiBTagDeepFlavour_2p4,
     fragment.HLT_DoublePFPuppiJets128_DoublePFPuppiBTagDeepFlavour_2p4,
 
-    #fragment.L1T_SingleTkMuon_22,
-    #fragment.L1T_DoubleTkMuon_15_7,
-    #fragment.L1T_TripleTkMuon_5_3_3,
+    fragment.L1T_SingleTkMuon_22,
+    fragment.L1T_DoubleTkMuon_15_7,
+    fragment.L1T_TripleTkMuon_5_3_3,
 
     fragment.HLT_Mu50_FromL1TkMuon,
     fragment.HLT_IsoMu24_FromL1TkMuon,
