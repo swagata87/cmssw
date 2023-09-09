@@ -52,6 +52,7 @@ L1TTkMuonFilter::L1TTkMuonFilter(const edm::ParameterSet& iConfig)
   min_N_ = iConfig.getParameter<int>("MinN");
   min_Eta_ = iConfig.getParameter<double>("MinEta");
   max_Eta_ = iConfig.getParameter<double>("MaxEta");
+  qualityIsMask_ = iConfig.getParameter<bool>("qualityIsMask");
   applyQuality_ = iConfig.getParameter<bool>("applyQuality");
   applyDuplicateRemoval_ = iConfig.getParameter<bool>("applyDuplicateRemoval");
   qualities_ = iConfig.getParameter<std::vector<int>>("qualities");
@@ -82,6 +83,7 @@ void L1TTkMuonFilter::fillDescriptions(edm::ConfigurationDescriptions& descripti
   desc.add<double>("MaxEta", 5.0);
   desc.add<int>("MinN", 1);
   desc.add<edm::InputTag>("inputTag", edm::InputTag("L1TkMuons"));
+  desc.add<bool>("qualityIsMask", false);
   desc.add<bool>("applyQuality", false);
   desc.add<bool>("applyDuplicateRemoval", true);
   desc.add<std::vector<int>>("qualities", {});
@@ -131,7 +133,20 @@ bool L1TTkMuonFilter::hltFilter(edm::Event& iEvent,
     // as they were for TkMuon (TkMuon being the old implementation, at the times
     // of the HLT-TDR). So we fall back to the hwQual() method inherited from
     // L1Candidate, and compare it with a vector of allowed qualities.
-    bool passesQual = !applyQuality_ || std::binary_search(qualities_.begin(), qualities_.end(), itkMuon->hwQual());
+    bool passesQual = !applyQuality_;
+    if(applyQuality_) {
+      if (qualityIsMask_) {
+        for(auto qual : qualities_) {
+          passesQual |= ((itkMuon->hwQual() & qual) > 0);
+          if (passesQual) {
+            break;
+          }
+        }
+      }
+      else {
+        passesQual = std::binary_search(qualities_.begin(), qualities_.end(), itkMuon->hwQual());
+      }
+    }
 
     if (passesQual && offlinePt >= min_Pt_ && itkMuon->phEta() <= max_Eta_ && itkMuon->phEta() >= min_Eta_) {
       l1t::TrackerMuonRef ref(tkMuons, distance(atrkmuons, itkMuon));

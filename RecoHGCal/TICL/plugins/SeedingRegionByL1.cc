@@ -36,7 +36,8 @@ void ticl::SeedingRegionByL1::makeRegions(const edm::Event &ev,
     const auto &l1TrkEm = (*l1TrkEms)[indx];
     double offlinePt = this->tkEmOfflineEt(l1TrkEm.pt());
     if ((offlinePt < minPt_) || (std::abs(l1TrkEm.eta()) < minAbsEta_) || (std::abs(l1TrkEm.eta()) > maxAbsEta_) ||
-        (l1TrkEm.EGRef()->hwQual() != quality_)) {
+        //(l1TrkEm.EGRef()->hwQual() != quality_)) {
+        !(l1TrkEm.hwQual() & quality_)) {
       continue;
     }
 

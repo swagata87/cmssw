@@ -133,9 +133,9 @@ bool L1TTkEleFilter::hltFilter(edm::Event& iEvent,
 
     if (applyQual1_) {
       if (qual1IsMask_)
-        passQuality = (itkEle->EGRef()->hwQual() & quality1_);
+        passQuality = (itkEle->hwQual() & quality1_);
       else
-        passQuality = (itkEle->EGRef()->hwQual() == quality1_);
+        passQuality = (itkEle->hwQual() == quality1_);
     } else
       passQuality = true;
 
@@ -156,6 +156,7 @@ bool L1TTkEleFilter::hltFilter(edm::Event& iEvent,
   }
 
   // Loop over second collection. Notice we don't reset ntrkEle
+  if(tkEles2){
   atrkEles = tkEles2->begin();
   otrkEles = tkEles2->end();
   for (itkEle = atrkEles; itkEle != otrkEles; itkEle++) {
@@ -165,9 +166,9 @@ bool L1TTkEleFilter::hltFilter(edm::Event& iEvent,
 
     if (applyQual2_) {
       if (qual2IsMask_)
-        passQuality = (itkEle->EGRef()->hwQual() & quality2_);
+        passQuality = (itkEle->hwQual() & quality2_);
       else
-        passQuality = (itkEle->EGRef()->hwQual() == quality2_);
+        passQuality = (itkEle->hwQual() == quality2_);
     } else
       passQuality = true;
 
@@ -184,7 +185,7 @@ bool L1TTkEleFilter::hltFilter(edm::Event& iEvent,
       l1t::TkElectronRef ref2(l1t::TkElectronRef(tkEles2, distance(atrkEles, itkEle)));
       filterproduct.addObject(trigger::TriggerObjectType::TriggerL1TkEle, ref2);
     }
-  }
+  }}
 
   // return with final filter decision
   const bool accept(ntrkEle >= min_N_);

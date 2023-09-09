@@ -6,6 +6,9 @@ __init__.py
 *~
 *.pb
 
+*logs/*
+*.root
+
 # ignore partially applied patches and their backup
 *.rej
 *.orig

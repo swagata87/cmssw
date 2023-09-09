@@ -37,6 +37,7 @@ private:
   int min_N_;                            // min number of candidates above pT cut
   double min_Eta_;                       // min eta cut
   double max_Eta_;                       // max eta cut
+  bool qualityIsMask_;                    // is quality to be applied as a mask
   bool applyQuality_;                    // apply quality cuts
   bool applyDuplicateRemoval_;           // apply duplicate removal
   std::vector<int> qualities_;           // allowed qualities
