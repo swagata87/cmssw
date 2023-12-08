@@ -55,6 +55,8 @@ private:
 
   edm::ESGetToken<EcalSeverityLevelAlgo, EcalSeverityLevelAlgoRcd> sevLvToken_;
   edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometrytoken_;
+
+  const EcalPFRecHitThresholds *thresholds = nullptr;
 };
 
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -94,6 +96,7 @@ EgammaEcalRecHitIsolationProducer::EgammaEcalRecHitIsolationProducer(const edm::
 void EgammaEcalRecHitIsolationProducer::produce(edm::StreamID,
                                                 edm::Event& iEvent,
                                                 const edm::EventSetup& iSetup) const {
+
   // Get the  filtered objects
   auto emObjectHandle = iEvent.getHandle(emObjectProducer_);
 
@@ -151,20 +154,20 @@ void EgammaEcalRecHitIsolationProducer::produce(edm::StreamID,
     if (tryBoth_) {  //barrel + endcap
       if (useIsolEt_)
         isoValue =
-            ecalBarrelIsol.getEtSum(&(emObjectHandle->at(i))) + ecalEndcapIsol.getEtSum(&(emObjectHandle->at(i)));
+	  ecalBarrelIsol.getEtSum(&(emObjectHandle->at(i)),*thresholds) + ecalEndcapIsol.getEtSum(&(emObjectHandle->at(i)),*thresholds);
       else
-        isoValue = ecalBarrelIsol.getEnergySum(&(emObjectHandle->at(i))) +
-                   ecalEndcapIsol.getEnergySum(&(emObjectHandle->at(i)));
+        isoValue = ecalBarrelIsol.getEnergySum(&(emObjectHandle->at(i)),*thresholds) +
+	  ecalEndcapIsol.getEnergySum(&(emObjectHandle->at(i)),*thresholds);
     } else if (fabs(superClus->eta()) < 1.479) {  //barrel
       if (useIsolEt_)
-        isoValue = ecalBarrelIsol.getEtSum(&(emObjectHandle->at(i)));
+        isoValue = ecalBarrelIsol.getEtSum(&(emObjectHandle->at(i)),*thresholds);
       else
-        isoValue = ecalBarrelIsol.getEnergySum(&(emObjectHandle->at(i)));
+        isoValue = ecalBarrelIsol.getEnergySum(&(emObjectHandle->at(i)),*thresholds);
     } else {  //endcap
       if (useIsolEt_)
-        isoValue = ecalEndcapIsol.getEtSum(&(emObjectHandle->at(i)));
+        isoValue = ecalEndcapIsol.getEtSum(&(emObjectHandle->at(i)),*thresholds);
       else
-        isoValue = ecalEndcapIsol.getEnergySum(&(emObjectHandle->at(i)));
+        isoValue = ecalEndcapIsol.getEnergySum(&(emObjectHandle->at(i)),*thresholds);
     }
 
     //we subtract off the electron energy here as well

@@ -64,7 +64,7 @@ EgammaRecHitIsolation::EgammaRecHitIsolation(double extRadius,
 
 EgammaRecHitIsolation::~EgammaRecHitIsolation() {}
 
-double EgammaRecHitIsolation::getSum_(const reco::Candidate* emObject, bool returnEt) const {
+double EgammaRecHitIsolation::getSum_(const reco::Candidate* emObject, bool returnEt, const EcalPFRecHitThresholds *thresholds) const {
   double energySum = 0.;
   if (!caloHits_.empty()) {
     //Take the SC position
@@ -96,6 +96,13 @@ double EgammaRecHitIsolation::getSum_(const reco::Candidate* emObject, bool retu
           float phiDiff = reco::deltaPhi(phi, phiclus);
           float energy = j->energy();
 
+	  float rhThres = 0.0;
+	  if (thresholds != nullptr) {
+	    rhThres = (*thresholds)[j->detid()];  // access ECAL PFRechit thresholds for noise cleaning
+	  }
+	  if (energy <= rhThres)
+	    continue;
+	  
           if (useNumCrystals_) {
             if (fabs(etaclus) < 1.479) {  // Barrel num crystals, crystal width = 0.0174
               if (fabs(etaDiff) < 0.0174 * etaSlice_)
@@ -171,10 +178,11 @@ double EgammaRecHitIsolation::getSum_(const reco::Candidate* emObject, bool retu
     }      //End loop over barrel/endcap
   }        //End if caloHits_
 
+ 
   return energySum;
 }
 
-double EgammaRecHitIsolation::getSum_(const reco::SuperCluster* sc, bool returnEt) const {
+double EgammaRecHitIsolation::getSum_(const reco::SuperCluster* sc, bool returnEt, const EcalPFRecHitThresholds *thresholds) const {
   double energySum = 0.;
   if (!caloHits_.empty()) {
     //Take the SC position
@@ -205,6 +213,15 @@ double EgammaRecHitIsolation::getSum_(const reco::SuperCluster* sc, bool returnE
           double phiDiff = reco::deltaPhi(phi, phiclus);
           double energy = j->energy();
 
+	  float rhThres = 0.0;
+          if (thresholds != nullptr) {
+            rhThres = (*thresholds)[j->detid()];  // access ECAL PFRechit thresholds for noise cleaning
+	  }
+	  std::cout << "rhThres = " << rhThres <<  "  energy = " << energy << std::endl;
+	    
+          if (energy <= rhThres)
+            continue;
+	  
           if (useNumCrystals_) {
             if (fabs(etaclus) < 1.479) {  // Barrel num crystals, crystal width = 0.0174
               if (fabs(etaDiff) < 0.0174 * etaSlice_)
