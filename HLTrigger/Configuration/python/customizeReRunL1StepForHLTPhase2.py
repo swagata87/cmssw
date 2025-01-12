@@ -215,7 +215,7 @@ def customizeReRunL1StepForHLTPhase2(process):
 
     process.FEVTDEBUGHLToutput.outputCommands.append('drop PixelDigiSimLinkedmDetSetVector_simSiPixelDigis_Tracker_HLT')
     process.FEVTDEBUGHLToutput.outputCommands.append('drop PixelDigiSimLinkedmDetSetVector_simSiPixelDigis_Pixel_HLT')
-    process.FEVTDEBUGHLToutput.outputCommands.append('drop DetIdHGCSampleHGCDataFramesSorted_simHGCalUnsuppressedDigis_EE_HLT')
+    #process.FEVTDEBUGHLToutput.outputCommands.append('drop DetIdHGCSampleHGCDataFramesSorted_simHGCalUnsuppressedDigis_EE_HLT')
     
 
     return process
